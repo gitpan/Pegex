@@ -1,0 +1,22 @@
+Changes
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
+lib/Pegex.pm
+lib/Pegex/AST.pm
+lib/Pegex/Base.pm
+lib/Pegex/Compiler.pm
+lib/Pegex/Gloom.pm
+lib/Pegex/Grammar.pm
+lib/Pegex/Receiver.pm
+Makefile.PL
+MANIFEST			This list of files
+META.yml
+README
+t/export_api.t
+t/use.t
