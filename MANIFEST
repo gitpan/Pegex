@@ -16,7 +16,6 @@ lib/Pegex/Grammar.pm
 lib/Pegex/Receiver.pm
 Makefile.PL
 MANIFEST			This list of files
-MANIFEST.bak
 META.yml
 README
 t/export_api.t
