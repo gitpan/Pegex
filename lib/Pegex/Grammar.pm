@@ -8,6 +8,7 @@ has 'grammar';
 has 'grammar_text';
 has 'grammar_tree';
 has 'receiver' => -init => 'require Pegex::AST; Pegex::AST->new()';
+has 'debug' => 0;
 
 has 'input';
 has 'position';
@@ -23,16 +24,7 @@ sub parse {
     my $start_rule = shift || undef;
 
     if (not $self->grammar) {
-        my $grammar_tree = $self->grammar_tree;
-        if (not $grammar_tree) {
-            my $grammar_text = $self->grammar_text;
-            if (not $grammar_text) {
-                die ref($self) . " object has no grammar";
-            }
-            require Pegex::Compiler;
-            $grammar_tree = Pegex::Compiler->new->compile($grammar_text)->grammar;
-        }
-        $self->grammar($grammar_tree);
+        $self->compile;
     }
 
     if (not ref $self->receiver) {
@@ -57,6 +49,27 @@ sub parse {
     else {
         return 1;
     }
+}
+
+sub compile {
+    my $self = shift;
+    my $grammar_tree = $self->grammar_tree;
+    if (not $grammar_tree) {
+        my $grammar_text = $self->grammar_text;
+        if (not $grammar_text) {
+            die ref($self) . " object has no grammar";
+        }
+        #require Pegex::Compiler;
+        require Pegex::Compiler::Bootstrap;
+        $grammar_tree =
+            #Pegex::Compiler->new
+            Pegex::Compiler::Bootstrap->new
+                ->compile($grammar_text)
+                ->combinate()
+                ->grammar;
+    }
+    $self->grammar($grammar_tree);
+    return $self;
 }
 
 sub match {
@@ -106,6 +119,7 @@ sub match {
     }
 
     if ($state and not $not) {
+        $self->trace("try_$state", 1);
         $self->callback("try_$state");
         $self->action("__try__", $state, $kind);
     }
@@ -114,23 +128,43 @@ sub match {
     my $count = 0;
     my $method = ($kind eq 'rule') ? 'match' : "match_$kind";
     while ($self->$method($rule)) {
+        $position = $self->position unless $not;
         $count++;
         last if $times eq '1' or $times eq '?';
     }
-    my $result = (($count or $times eq '?' or $times eq '*') ? 1 : 0) ^ $not;
+    if ($count and $times =~ /[\+\*]/) {
+        $self->position($position);
+    }
+    my $result = (($count or $times =~ /^[\?\*]$/) ? 1 : 0) ^ $not;
+    $self->position($position) unless $result;
 
     if ($state and not $not) {
+        $self->trace(($result ? "got" : "not") . "_$state");
+
         $result
             ? $self->action("__got__", $state, $method)
             : $self->callback("__not__", $state, $method);
         $result
             ? $self->callback("got_$state")
             : $self->callback("not_$state");
-        $self->callback("end_$state")
+        $self->callback("end_$state");
     }
-
-    $self->position($position) unless $result;
     return $result;
+}
+
+sub trace {
+    my $self = shift;
+    return unless $self->debug;
+    my $action = shift;
+    my $indent = shift || 0;
+    $self->{indent} ||= 0;
+    $self->{indent}-- unless $indent;
+    print ' ' x $self->{indent};
+    $self->{indent}++ if $indent;
+    my $snippet = substr($self->input, $self->position);
+    $snippet = substr($snippet, 0, 30) . "..." if length $snippet > 30;
+    $snippet =~ s/\n/\\n/g;
+    print sprintf("%-30s", $action) . ($indent ? " >$snippet<\n" : "\n");
 }
 
 sub match_all {
@@ -188,16 +222,18 @@ sub callback {
 sub throw_error {
     my $self = shift;
     my $msg = shift;
-    die $msg;
-#     my $line = @{[substr($self->input, 0, $self->position) =~ /(\n)/g]} + 1;
-#     my $context = substr($self->input, $self->position, 50);
-#     $context =~ s/\n/\\n/g;
-#     die <<"...";
-# Error parsing TestML document:
-#   msg: $msg
-#   line: $line
-#   context: "$context"
-# ...
+#     die $msg;
+    my $line = @{[substr($self->input, 0, $self->position) =~ /(\n)/g]} + 1;
+    my $context = substr($self->input, $self->position, 50);
+    $context =~ s/\n/\\n/g;
+    my $position = $self->position;
+    die <<"...";
+Error parsing Pegex document:
+  msg: $msg
+  line: $line
+  context: "$context"
+  position: $position
+...
 }
 
 1;
