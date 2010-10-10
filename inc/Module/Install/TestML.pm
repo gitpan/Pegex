@@ -40,13 +40,13 @@ sub use_testml {
 
 sub testml_setup {
     my $self = shift;
-    return unless $self->admin;
+    return unless $self->is_admin;
     my $config = shift;
     die "setup_config requires a yaml file argument"
         unless $config;
     die "'$config' is not an existing file"
         unless -f $config;
-    print "Updating testml files...\n";
+    print "testml_setup\n";
     require TestML::Setup;
     TestML::Setup::testml_setup($config);
 }

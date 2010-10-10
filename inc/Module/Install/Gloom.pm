@@ -13,6 +13,8 @@ sub use_gloom {
     my $module = shift
         or die "use_gloom requires the name of a target module";
 
+    return unless $self->is_admin;
+
     my $gloom_path = $self->admin->find_in_inc('Gloom') or return;
     open IN, $gloom_path or die "Can't open '$gloom_path' for input";
     my $code = do { local $/; <IN> };
@@ -32,4 +34,4 @@ sub use_gloom {
 
 =encoding utf8
 
-#line 78
+#line 80
