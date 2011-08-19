@@ -14,9 +14,11 @@ lib/Pegex.pm
 lib/Pegex.pod
 lib/Pegex/AST.pm
 lib/Pegex/AST.pod
+lib/Pegex/Base.pm
 lib/Pegex/Compiler.pm
 lib/Pegex/Compiler.pod
 lib/Pegex/Compiler/Bootstrap.pm
+lib/Pegex/Compiler/Bootstrap.pod
 lib/Pegex/Compiler/Grammar.pm
 lib/Pegex/Compiler/Grammar.pod
 lib/Pegex/Grammar.pm

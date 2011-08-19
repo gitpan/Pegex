@@ -19,10 +19,9 @@ no_index:
     - inc
     - t
 requires:
-  Mouse: 0.93
   perl: 5.8.3
 resources:
   homepage: http://github.com/ingydotnet/pegex-pm/tree
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ingydotnet/pegex-pm.git
-version: 0.12
+version: 0.13

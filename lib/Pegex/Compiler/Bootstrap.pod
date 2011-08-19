@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Pegex::Compiler::Grammar - Pegex Grammar for a Pegex Grammar
+Pegex::Compiler::Bootstrap - Bootstrapping Compiler for a Pegex Grammar
 
 =head1 AUTHOR
 
