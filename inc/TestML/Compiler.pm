@@ -5,7 +5,6 @@ use TestML::Base -base;
 use TestML::Grammar;
 
 has 'base';
-has 'debug' => '0';
 
 sub compile {
     my $self = shift;
@@ -22,19 +21,20 @@ sub compile {
 
     my ($code, $data) = @$result{qw(code data)};
 
-    my $debug = $self->debug;
-    $debug = $result->{DebugPegex} if defined $result->{DebugPegex};
+#     my $debug = $self->debug;
+#     $debug = $result->{DebugPegex} if defined $result->{DebugPegex};
     my $grammar = TestML::Grammar->new(
         receiver => TestML::Receiver->new,
-        debug => $debug,
     );
     $grammar->parse($code, 'code_section')
         or die "Parse TestML code section failed";
 
     $self->fixup_grammar($grammar, $result);
 
-    $grammar->parse($data, 'data_section')
-        or die "Parse TestML data section failed";
+    if (length $data) {
+        $grammar->parse($data, 'data_section')
+            or die "Parse TestML data section failed";
+    }
 
     if ($result->{DumpAST}) {
         XXX($grammar->receiver->function);
@@ -142,24 +142,25 @@ sub fixup_grammar {
     my $namespace = $grammar->receiver->function->namespace;
     $namespace->{TestML} = $hash->{TestML};
 
-    $grammar = $grammar->grammar;
-    my $point_lines = $grammar->{point_lines}{'+re'};
+    my $tree = $grammar->tree;
+
+    my $point_lines = $tree->{point_lines}{'.rgx'};
 
     my $block_marker = $hash->{BlockMarker};
     if ($block_marker) {
         $block_marker =~ s/([\$\%\^\*\+\?\|])/\\$1/g;
-        $grammar->{block_marker}{'+re'} = qr/\G$block_marker/;
+        $tree->{block_marker}{'.rgx'} = qr/\G$block_marker/;
         $point_lines =~ s/===/$block_marker/;
     }
 
     my $point_marker = $hash->{PointMarker};
     if ($point_marker) {
         $point_marker =~ s/([\$\%\^\*\+\?\|])/\\$1/g;
-        $grammar->{point_marker}{'+re'} = qr/\G$point_marker/;
+        $tree->{point_marker}{'.rgx'} = qr/\G$point_marker/;
         $point_lines =~ s/---/$point_marker/;
     }
 
-    $grammar->{point_lines}{'+re'} = qr/$point_lines/;
+    $tree->{point_lines}{'.rgx'} = qr/$point_lines/;
 }
 
 sub slurp {

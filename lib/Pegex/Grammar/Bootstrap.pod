@@ -1,0 +1,32 @@
+=encoding utf8
+
+=head1 NAME
+
+Pegex::Grammar::Bootstrap - Pegex Grammar Class (to Bootstrap TestML)
+
+=head1 DESCRIPTION
+
+Pegex tests itself with TestML. TestML parses itself with Pegex. Bootstrapping
+problem. This is the solution.
+
+This is the copy of the Pegex Grammar runtime that TestML relies on. Otherwise
+it is impossible to test changes to the runtime using the TestML tests.
+
+This way we can use the last known good Pegex runtime with TestML to test new
+changes to the runtime. When the new runtime is stable, then it gets moved to
+here, and the TestML grammar gets recompiled and installed.
+
+=head1 AUTHOR
+
+Ingy döt Net <ingy@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2010, 2011. Ingy döt Net.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=cut

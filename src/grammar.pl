@@ -1,25 +1,23 @@
 use lib "$ENV{HOME}/src/pegex-pm/lib";
-use Pegex::Compiler::Bootstrap;
+use Pegex::Compiler;
 
-open IN, shift or die;
-my $grammar = do {local $/; <IN>};
-my $perl = Pegex::Compiler::Bootstrap->compile($grammar)->combinate->to_perl;
+my $perl = Pegex::Compiler->compile(shift)->to_perl;
 chomp($perl);
 
 print <<"...";
 ##
-# name:      Pegex::Compiler::Grammar
-# abstract:  Pegex Grammar for a Pegex Grammar
+# name:      Pegex::Grammar::Pegex
+# abstract:  Pegex Grammar for the Pegex Grammar Language
 # author:    Ingy döt Net <ingy\@cpan.org>
 # license:   perl
 # copyright: 2010, 2011
 
-package Pegex::Compiler::Grammar;
+package Pegex::Grammar::Pegex;
 use base 'Pegex::Grammar';
 use strict;
 use warnings;
 
-sub grammar_tree {
+sub tree_ {
     return +$perl;
 }
 

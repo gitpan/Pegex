@@ -8,38 +8,24 @@
 package Pegex::AST;
 use Pegex::Receiver -base;
 
-has 'ast';
-has 'stack';
+# XXX Add these options.
+# has add_full_regex_match => 0;
+# has keep_positions => 0;
+# has keep_empty_regex => 0;
+# has keep_empty_list => 0;
+# has keep_single_list => 0;
 
-# use XXX;
-
-sub __begin__ {
-    my $self = shift;
-    my $ast = $self->ast({});
-    my $stack = $self->stack([]);
+sub got {
+    return +{ $_[1] => $_[2] };
 }
 
-sub __try__ {
-    my $self = shift;
-    my $rule = shift;
-    my $kind = shift;
-}
-
-sub __got__ {
-    my $self = shift;
-    my $rule = shift;
-    my $kind = shift;
-}
-
-sub __not__ {
-    my $self = shift;
-    my $rule = shift;
-    my $kind = shift;
-}
-
-sub __end__ {
-    my $self = shift;
-    $self->data($self->ast);
+sub final {
+    my ($self, $match, $top) = @_;
+    my $final = $match eq $Pegex::Ignore
+        ? { $top => {} }
+        : $match;
+    $self->data($final);
+    return $final;
 }
 
 1;

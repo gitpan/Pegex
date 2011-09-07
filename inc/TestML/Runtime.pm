@@ -11,6 +11,7 @@ our $self;
 has 'base', -init => '$0 =~ m!(.*)/! ? $1 : "."';   # Base directory
 has 'testml';           # TestML document filename, handle or text
 has 'bridge';           # Bridge transform module
+
 # XXX Add TestML.pm support for -library keyword.
 has 'library' => [];    # Transform library modules
 

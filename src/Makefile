@@ -1,4 +1,12 @@
-BASE=../lib/Pegex/Compiler
+BASE=../lib/Pegex/Grammar
 
-$(BASE)/Grammar.pm: pegex.pgx grammar.pl Makefile
-	perl grammar.pl $< > $@
+# all: $(BASE)/Pegex.pm $(BASE)/Bootstrap.pm
+
+all: $(BASE)/Pegex.pm
+
+$(BASE)/Pegex.pm: pegex.pgx grammar.pl Makefile
+	perl grammar.pl $< > $@.tmp
+	mv $@.tmp $@
+
+$(BASE)/Bootstrap.pm: bootstrap.pl Makefile
+	perl $< > $@

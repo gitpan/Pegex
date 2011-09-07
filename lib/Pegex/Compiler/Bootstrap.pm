@@ -8,11 +8,13 @@
 package Pegex::Compiler::Bootstrap;
 use Pegex::Compiler -base;
 
-sub compile {
+use Pegex::Grammar::Atoms;
+
+sub parse {
     my $self = shift;
     $self = $self->new unless ref $self;
     my $grammar_text = shift;
-    $self->grammar({});
+    $self->tree({});
     $grammar_text =~ s/^#.*\n+//gm;
     $grammar_text =~ s/^\s*\n//;
     $grammar_text .= "\n" unless $grammar_text =~ /\n\z/;
@@ -22,21 +24,21 @@ sub compile {
         my $key = $1;
         $value =~ s/\s+/ /g;
         $value =~ s/^\s*(.*?)\s*$/$1/;
-        $self->grammar->{$key} = $value;
-        $self->grammar->{_FIRST_RULE} ||= $key;
+        $self->tree->{$key} = $value;
+        $self->tree->{'+top'} ||= $key;
     }
 
-    for my $rule (sort keys %{$self->grammar}) {
-        next if $rule =~ /^_/;
-        my $text = $self->grammar->{$rule};
+    for my $rule (sort keys %{$self->tree}) {
+        next if $rule =~ /^\+/;
+        my $text = $self->tree->{$rule};
         my @tokens = ($text =~ m{(
             /[^/]*/ |
-            <[\!\&]?\w+>[\?\*\+]? |
+            [\!\=]?<\w+>[\?\*\+]? |
             `[^`]*` |
             \| |
-            \[[\!\&?]? |
+            [\!\=?]?\[ |
             \][\?\*\+]? |
-            \([\!\&?]? |
+            \([\!\=?]? |
             \)[\?\*\+]?
         )}gx);
         die "No tokens found for rule <$rule> => '$text'"
@@ -44,7 +46,7 @@ sub compile {
         unshift @tokens, '[';
         push @tokens, ']';
         my $tree = $self->make_tree(\@tokens);
-        $self->grammar->{$rule} = $self->compile_next($tree);  
+        $self->tree->{$rule} = $self->compile_next($tree);  
     }
     return $self;
 }
@@ -56,7 +58,7 @@ sub make_tree {
     my $tree = [];
     push @$stack, $tree;
     for my $token (@$tokens) {
-        if ($token =~ /^[\[\(]/) {
+        if ($token =~ /^[\!\=?]?[\[\(]/) {
             push @$stack, [];
         }
         push @{$stack->[-1]}, $token;
@@ -80,8 +82,8 @@ sub compile_next {
         : $node =~ m!`! ? $self->compile_error($node)
         : die $node;
 
-    while (defined $unit->{'+all'} and @{$unit->{'+all'}} == 1) {
-        $unit = $unit->{'+all'}->[0];
+    while (defined $unit->{'.all'} and @{$unit->{'.all'}} == 1) {
+        $unit = $unit->{'.all'}->[0];
     }
     return $unit;
 }
@@ -91,25 +93,22 @@ sub compile_group {
     my $node = shift;
     my $type = shift;
     die unless @$node > 2;
-    if ($node->[0] =~ s/\&$//) {
-        return $self->compile_has($node);
-    }
-    if ($node->[0] =~ s/\!$//) {
-        return $self->compile_not($node);
-    }
     my $object = {};
-    if ($node->[-1] =~ /([\?\*\+])$/) {
-        $object->{'<'} = $1;
+    if ($node->[0] =~ /^([\=\!])/) {
+        $object->{'+mod'} = $1;
+    }
+    if ($node->[-1] =~ /([\?\*\+])$/ and not $object->{'+mod'}) {
+        $object->{'+mod'} = $1;
     }
     shift @$node;
     pop @$node;
     if ($type eq 'any') {
-        $object->{'+any'} = [
+        $object->{'.any'} = [
             map $self->compile_next($_), grep {$_ ne '|'} @$node
         ];
     }
     elsif ($type eq 'all') {
-        $object->{'+all'} = [
+        $object->{'.all'} = [
             map $self->compile_next($_), @$node
         ];
     }
@@ -121,7 +120,7 @@ sub compile_re {
     my $node = shift;
     my $object = {};
     $node =~ s!^/(.*)/$!$1! or die $node;
-    $object->{'+re'} = $node;
+    $object->{'.rgx'} = $node;
     return $object;
 }
 
@@ -129,18 +128,16 @@ sub compile_rule {
     my $self = shift;
     my $node = shift;
     my $object = {};
-    if ($node =~ s/([\?\*\+])$//) {
-        $object->{'<'} = $1;
+    if ($node =~ s/^([\=\!])//) {
+        $object->{'+mod'} = $1;
+    }
+    if ($node =~ s/([\?\*\+])$// and not $object->{'+mod'}) {
+        $object->{'+mod'} = $1;
     }
     $node =~ s!^<(.*)>$!$1! or die;
-    if ($node =~ s/^!//) {
-        $object->{'+not'} = $node;
-    }
-    else {
-        $object->{'+rule'} = $node;
-    }
-    if (defined(my $re = $self->atoms->{$node})) {
-        $self->grammar->{$node} ||= {'+re' => $re};
+    $object->{'.ref'} = $node;
+    if (defined(my $re = Pegex::Grammar::Atoms->atoms->{$node})) {
+        $self->tree->{$node} ||= {'.rgx' => $re};
     }
 
     return $object;
@@ -151,7 +148,7 @@ sub compile_error {
     my $node = shift;
     my $object = {};
     $node =~ s!^`(.*)`$!$1! or die $node;
-    $object->{'+error'} = $node;
+    $object->{'.err'} = $node;
     return $object;
 }
 
