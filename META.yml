@@ -25,4 +25,4 @@ resources:
   homepage: http://github.com/ingydotnet/pegex-pm/tree
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ingydotnet/pegex-pm.git
-version: 0.15
+version: 0.16

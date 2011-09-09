@@ -21,8 +21,6 @@ inc/TestML/Runtime.pm
 inc/TestML/Runtime/TAP.pm
 lib/Pegex.pm
 lib/Pegex.pod
-lib/Pegex/AST.pm
-lib/Pegex/AST.pod
 lib/Pegex/AST/Bootstrap.pm
 lib/Pegex/AST/Bootstrap.pod
 lib/Pegex/Base.pm
