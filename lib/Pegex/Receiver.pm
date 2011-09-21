@@ -6,9 +6,10 @@
 # copyright: 2011
 
 package Pegex::Receiver;
-use Pegex::Base -base;
+use Pegex::Mo;
 
 has 'parser';
 has 'data';
+has wrap => default => sub { 0 };
 
 1;

@@ -4,6 +4,8 @@ use Pegex::Compiler;
 my $perl = Pegex::Compiler->compile(shift)->to_perl;
 chomp($perl);
 
+$perl =~ s/^/  /gm;
+
 print <<"...";
 ##
 # name:      Pegex::Grammar::Pegex
@@ -13,12 +15,11 @@ print <<"...";
 # copyright: 2010, 2011
 
 package Pegex::Grammar::Pegex;
-use base 'Pegex::Grammar';
-use strict;
-use warnings;
+use Pegex::Mo;
+extends 'Pegex::Grammar';
 
 sub tree_ {
-    return +$perl;
+$perl
 }
 
 1;

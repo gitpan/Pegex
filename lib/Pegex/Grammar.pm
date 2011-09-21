@@ -6,20 +6,25 @@
 # copyright: 2010, 2011
 
 package Pegex::Grammar;
-use Pegex::Base -base;
+use Pegex::Mo;
 
 # Grammar can be in text or tree form. Tree will be compiled from text.
-has 'text' => -init =>
-    q{die "Can't create a '" . ref($self) . "' grammar. No 'text' or 'tree'."};
-has 'tree' => -init => '$self->tree_';
+has 'text' => default => sub {
+    my $self = shift;
+    die "Can't create a '" . ref($self) . "' grammar. No 'text' or 'tree'.";
+};
+has 'tree' => builder => 'tree_';
 sub tree_ {
     require Pegex::Compiler;
     Pegex::Compiler->compile($_[0]->text)->tree;
 }
 
 # Parser and receiver classes to use.
-has 'parser'    => 'Pegex::Parser';
-has 'receiver'  => 'Pegex::Receiver';
+has 'parser' => default => sub {'Pegex::Parser'};
+has 'receiver' => default => sub {
+    require Pegex::Receiver;
+    Pegex::Receiver->new(wrap => 1);
+};
 
 sub parse {
     my $self = shift;
@@ -44,6 +49,34 @@ sub parse {
 
     return $parser->parse(@_);
 }
+
+sub import {
+    goto &Pegex::Mo::import
+        unless ((caller))[1] =~ /^-e?$/ and @_ == 2 and $_[1] eq 'compile';
+    my $package = shift;
+    $package->compile_into_module();
+    exit;
+}
+
+sub compile_into_module {
+    my ($package) = @_;
+    my $grammar = $package->text;
+    my $module = $package;
+    $module =~ s!::!/!g;
+    $module = "$module.pm";
+    my $file = $INC{$module} or return;
+    require Pegex::Compiler;
+    my $perl = Pegex::Compiler->compile($grammar)->to_perl;
+    open IN, $file or die $!;
+    my $module_text = do {local $/; <IN>};
+    close IN;
+    $perl =~ s/^/  /gm;
+    $module_text =~ s/^(sub\s+tree_?\s*\{).*?(^\})/$1\n$perl$2/ms;
+    open OUT, '>', $file or die $!;
+    print OUT $module_text;
+    close OUT;
+}
+
 
 1;
 

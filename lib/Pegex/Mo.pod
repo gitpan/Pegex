@@ -2,17 +2,7 @@
 
 =head1 NAME
 
-Pegex::Parser::Bootstrap - Pegex Parser Runtime Bootstrap for TestML
-
-=head1 SEE ALSO
-
-=over
-
-=item *
-
-L<Pegex::Grammar>
-
-=back
+Pegex::Mo - Mo Base Class for Pegex
 
 =head1 AUTHOR
 
@@ -20,7 +10,7 @@ Ingy döt Net <ingy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2011. Ingy döt Net.
+Copyright (c) 2010, 2011. Ingy döt Net.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

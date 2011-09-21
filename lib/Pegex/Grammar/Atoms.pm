@@ -6,12 +6,13 @@
 # copyright: 2011
 
 package Pegex::Grammar::Atoms;
-use Pegex::Base -base;
+use Pegex::Mo;
 
 #------------------------------------------------------------------------------#
 # Pegex regex atoms for grammars
 #------------------------------------------------------------------------------#
 my $atoms = {
+    ws      => '<WS>*',
     ALWAYS  => '',
     NEVER   => '(?!)',
     ALL     => '[\s\S]',
@@ -58,7 +59,7 @@ my $atoms = {
     TILDE   => '~',
     GRAVE   => '`',
     UNDER   => '_',
-    DASH    => '-',
+    DASH    => '\-',
     PLUS    => '\+',
     EQUAL   => '=',
     PIPE    => '\|',

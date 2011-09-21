@@ -36,8 +36,7 @@ a: /x*(y*)z*<EOL>/
 --- input
 xxxyyyyzzz
 --- ast
-a:
-  1: yyyy
+a: yyyy
 
 === Single Regex - Multi Capture
 --- grammar
@@ -46,9 +45,9 @@ a: /(x*)(y*)(z*)<EOL>/
 xxxyyyyzzz
 --- ast
 a:
-  1: xxx
-  2: yyyy
-  3: zzz
+- xxx
+- yyyy
+- zzz
 
 === Single Regex - No Capture
 --- grammar
@@ -56,7 +55,7 @@ a: /x*y*z*<EOL>/
 --- input
 xxxyyyyzzz
 --- ast
-a: {}
+a: []
 
 === A subrule
 --- grammar
@@ -66,10 +65,8 @@ b: /(x+)/
 xxxyyyy
 --- ast
 a:
-- b:
-    1: xxx
-- 1: yyyy
-- EOL: {}
+- b: xxx
+- yyyy
 
 === Multi match regex in subrule
 --- grammar
@@ -80,8 +77,8 @@ xxxyyyyzzz
 --- ast
 a:
   b:
-    1: xxx
-    2: zzz
+  - xxx
+  - zzz
 
 === Any rule group
 --- grammar
@@ -93,8 +90,8 @@ xxxyyyyzzz
 --- ast
 a:
   c:
-    1: xxx
-    2: zzz
+  - xxx
+  - zzz
 
 === + Modifier
 --- grammar
@@ -105,15 +102,10 @@ c: /(y+)/
 xxyyxy
 --- ast
 a:
-- - - b:
-        1: xx
-    - c:
-        1: yy
-  - - b:
-        1: x
-    - c:
-        1: y
-- EOL: {}
+- - - b: xx
+    - c: yy
+  - - b: x
+    - c: y
 
 === Empty regex group plus rule
 --- grammar
@@ -124,10 +116,8 @@ c: /(yyy)/
 xxxyyy
 --- ast
 a:
-- - b: {}
-- c:
-    1: yyy
-- EOL: {}
+- []
+- c: yyy
 
 
 === Part of Pegex Grammar
@@ -146,27 +136,18 @@ grammar: [ <comment>* <rule_definition> ]+ <comment>*
 rule_definition: /<WS>*/ <rule_name> /<COLON><WS>*/ <rule_line>
 --- ast
 grammar:
-- - - - comment: {}
+- - - []
     - rule_definition:
-      - {}
-      - rule_name:
-          1: grammar
-      - {}
-      - rule_line:
-          1: '[ <comment>* <rule_definition> ]+ <comment>*'
+      - rule_name: grammar
+      - rule_line: '[ <comment>* <rule_definition> ]+ <comment>*'
   - - []
     - rule_definition:
-      - {}
-      - rule_name:
-          1: rule_definition
-      - {}
-      - rule_line:
-          1: /<WS>*/ <rule_name> /<COLON><WS>*/ <rule_line>
+      - rule_name: rule_definition
+      - rule_line: /<WS>*/ <rule_name> /<COLON><WS>*/ <rule_line>
 - []
 
 
 === Rule to Rule to Rule
---- LAST
 --- grammar
 a: <b>
 b: <c>*
@@ -179,11 +160,7 @@ xyz
 a:
   b:
   - c:
-    - d:
-        1: y
-    - EOL: {}
+    - d: y
   - c:
-    - d:
-        1: y
-    - EOL: {}
+    - d: y
 

@@ -1,6 +1,7 @@
 #line 1
 package TestML::Runtime::TAP;
-use TestML::Runtime -base;
+use TestML::Mo;
+extends 'TestML::Runtime';
 
 use Test::Builder;
 
@@ -13,7 +14,7 @@ if ($TestML::Test::Differences) {
     };
 }
 
-has 'test_builder' => -init => 'Test::Builder->new';
+has test_builder => default => sub { Test::Builder->new };
 
 sub title {
     my $self = shift;

@@ -6,7 +6,7 @@
 # copyright: 2011
 
 package Pegex::Compiler;
-use Pegex::Base -base;
+use Pegex::Mo;
  
 use Pegex::Parser;
 use Pegex::Grammar::Pegex;
@@ -37,12 +37,19 @@ sub compile_raw {
 }
 
 sub parse {
+    if ($Pegex::Compiler::Bootstrap) {
+        require Pegex::Compiler::Bootstrap;
+        $_[0] = Pegex::Compiler::Bootstrap->new;
+        my $self = shift;
+        return $self->parse(@_)
+    }
+
     my $self = shift;
     $self = $self->new unless ref $self;
 
     my $parser = Pegex::Parser->new(
         grammar => Pegex::Grammar::Pegex->new,
-        receiver => Pegex::Compiler::Receiver->new,
+        receiver => Pegex::Compiler::AST->new,
     );
 
     $self->tree($parser->parse(@_));
@@ -79,6 +86,9 @@ sub combinate_rule {
 sub combinate_object {
     my $self = shift;
     my $object = shift;
+    if (my $sub = $object->{'.sep'}) {
+        $self->combinate_object($sub);
+    }
     if (exists $object->{'.rgx'}) {
         $self->combinate_re($object);
     }
@@ -110,6 +120,7 @@ sub combinate_re {
     my $self = shift;
     my $regexp = shift;
     my $atoms = Pegex::Grammar::Atoms->atoms;
+    $regexp->{'.rgx'} =~ s!~!<ws>!g;
     while (1) {
         my $re = $regexp->{'.rgx'};
         $re =~ s[<(\w+)>][
@@ -185,6 +196,10 @@ sub to_perl {
     my $pegex_compiler = Pegex::Compiler->new();
     my $grammar_tree = $pegex_compiler->compile($grammar_text)->tree;
 
+or:
+
+    perl -Ilib -MYourGrammarModule=compile
+
 =head1 DESCRIPTION
 
 The Pegex::Compiler transforms a Pegex grammar string (or file) into a
@@ -253,3 +268,28 @@ Serialize the current grammar tree to JSON.
 Serialize the current grammar tree to Perl.
 
 =back
+
+=head1 IN PLACE COMPILATION
+
+When you write a Pegex based module you will want to precompile your grammar
+into Perl so that it has no load penalty. Pegex::Grammar provides a special
+mechanism for this. Say you have a class like this:
+
+    package MyThing::Grammar;
+    use Pegex::Mo;
+    extends 'Pegex::Grammar';
+
+    use constant text => '../mything-grammar-repo/mything.pgx';
+    sub tree {
+    }
+
+Simply use this command:
+
+    perl -Ilib -MMyThing::Grammar=compile
+
+and Pegex::Grammar will call Pegex::Compile to put your compiled grammar
+inside your C<tree> subroutine. It will actually write the text into your
+module. This makes it trivial to update your grammar module after making
+changes to the grammar file.
+
+See L<Pegex::JSON> for an example.

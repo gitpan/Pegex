@@ -10,18 +10,24 @@
 # - irc://irc.freenode.net#testml 
 
 use 5.006001;
+
+use Pegex 0.13 ();
+my $require = "
+use Pegex::Mo 0 ();
+use Pegex::Grammar 0 ();
+use Pegex::Parser 0 ();
+use Pegex::Receiver 0 ();
+";
+
 package TestML;
 use strict;
 use warnings;
 
 use TestML::Runtime;
 
-use Pegex 0.13 ();
-
 our $VERSION = '0.22';
 
-our @EXPORT = qw(str num bool list WWW XXX YYY ZZZ);
-
+use constant XXX_skip => 1;
 our $DumpModule = 'YAML::XS';
 sub WWW { require XXX; local $XXX::DumpModule = $DumpModule; XXX::WWW(@_) }
 sub XXX { require XXX; local $XXX::DumpModule = $DumpModule; XXX::XXX(@_) }
@@ -42,10 +48,6 @@ sub import {
 
     strict->import;
     warnings->import;
-
-    if (@_ > 1 and $_[1] eq '-base') {
-        goto &TestML::Base::import;
-    }
 
     my $pkg = shift;
     while (@_) {
@@ -115,9 +117,19 @@ sub import {
         }
     }
 
-    require Exporter;
-    @_ = ($pkg);
-    goto &Exporter::import;
+    no strict 'refs';
+    my $p = caller;
+    *{$p.'::str'} = \&str;
+    *{$p.'::num'} = \&num;
+    *{$p.'::bool'} = \&bool;
+    *{$p.'::list'} = \&list;
+
+    if (not defined &{$pkg.'::XXX'}) {
+        *{$p.'::WWW'} = \&WWW;
+        *{$p.'::XXX'} = \&XXX;
+        *{$p.'::YYY'} = \&YYY;
+        *{$p.'::ZZZ'} = \&ZZZ;
+    }
 }
 
 1;

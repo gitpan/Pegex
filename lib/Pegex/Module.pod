@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Pegex::AST::Bootstrap - Pegex Abstract Syntax Tree Bootstrap for TestML
+Pegex::Module - Base Class for Pegex Grammar Interface Modules
 
 =head1 AUTHOR
 

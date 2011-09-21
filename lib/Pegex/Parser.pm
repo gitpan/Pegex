@@ -1,4 +1,4 @@
-##
+#u
 # name:      Pegex::Parser
 # abstract:  Pegex Parser Runtime
 # author:    Ingy döt Net <ingy@cpan.org>
@@ -8,33 +8,40 @@
 # - Pegex::Grammar
 
 package Pegex::Parser;
-use Pegex::Base -base;
+use Pegex::Mo;
 
 use Pegex::Input;
 
 use Scalar::Util;
 
-# Parser and receiver objects/classes to use.
+# Grammar object or class
 has 'grammar';
-has 'receiver' => -init => 'require Pegex::Receiver; Pegex::Receiver->new()';
+# Receiver object or class
+has 'receiver' => default => sub {
+    require Pegex::Receiver;
+    Pegex::Receiver->new();
+};
+
+# Parser options
+has 'throw_on_error' => default => sub {1};
+# Allow a partial parse
+has 'partial' => default => sub {0};
+# Wrap results in hash with rule name for key
+has 'wrap' => default => sub { $_[0]->receiver->wrap };
 
 # Internal properties.
 has 'input';
 has 'buffer';
-has 'position' => 0;
-has 'match_groups' => [];
-has 'error' => 'die';
+has 'position' => default => sub {0};
 
 # Debug the parsing of input.
-has 'debug' => -init => '$self->debug_';
+has 'debug' => builder => 'debug_';
 
 sub debug_ {
     exists($ENV{PERL_PEGEX_DEBUG}) ? $ENV{PERL_PEGEX_DEBUG} :
     defined($Pegex::Parser::Debug) ? $Pegex::Parser::Debug :
     0;
 }
-
-$Pegex::Ignore = bless {}, 'Pegex-Ignore';
 
 sub parse {
     my $self = shift;
@@ -56,12 +63,10 @@ sub parse {
         $self->grammar($grammar->new);
     }
 
-    my $start_rule = shift || undef;
-    $start_rule ||= 
-        $self->grammar->tree->{TOP}
-            ? 'TOP'
-            : $self->grammar->tree->{'+top'}
-        or die "No starting rule for Pegex::Parser::parse";
+    my $start_rule = shift ||
+        $self->grammar->tree->{'+top'} ||
+        ($self->grammar->tree->{'TOP'} ? 'TOP' : undef)
+            or die "No starting rule for Pegex::Parser::parse";
 
     my $receiver = $self->receiver or die "No 'receiver'. Can't parse";
     if (not ref $receiver) {
@@ -72,6 +77,7 @@ sub parse {
     $self->receiver->parser($self);
     Scalar::Util::weaken($self->receiver->{parser});
 
+    # Do the parse
     my $match = $self->match($start_rule) or return;
 
     # Parse was successful!
@@ -82,74 +88,127 @@ sub parse {
 sub match {
     my ($self, $rule) = @_;
 
-    $self->receiver->begin()
-        if $self->receiver->can("begin");
+    $self->receiver->initialize($rule)
+        if $self->receiver->can("initialize");
 
-    my $match = $self->match_ref($rule);
-    if ($self->position < length($self->buffer)) {
+    my $match = $self->match_next({'.ref' => $rule});
+    if (not $match or $self->position < length($self->buffer)) {
         $self->throw_error("Parse document failed for some reason");
-        return;  # If $self->error eq 'live'
+        return;  # In case $self->throw_on_error is off
     }
+    $match = $match->[0];
 
-    $match = $self->receiver->final($match, $rule)
-        if $self->receiver->can("final");
+    $match = $self->receiver->finalize($match, $rule)
+        if $self->receiver->can("finalize");
+
+    $match = {$rule => []} unless $match;
+
+    $match = $match->{TOP} || $match if $rule eq 'TOP';
 
     return $match;
 }
 
 sub match_next {
-    my ($self, $next, $state) = @_;
+    my ($self, $next) = @_;
 
-    my ($has, $not, $times) = (0, 0, '1');
-    if (my $mod = $next->{'+mod'}) {
-        ($mod eq '=') ? ($has = 1) :
-        ($mod eq '!') ? ($not = 1) :
-        ($times = $mod);
-    }
+    return $self->match_next_with_sep($next)
+        if $next->{'.sep'};
 
+    my $quantity = $next->{'+qty'} || '1';
+    my $assertion = $next->{'+asr'} || 0;
     my ($rule, $kind) = map {($next->{".$_"}, $_)}
-        grep {$next->{".$_"}} qw(ref rgx all any err)
-            or XXX $next;
-
-    $self->callback("try", $state) if $state and not($has or $not);
+        grep {$next->{".$_"}} qw(ref rgx all any err) or XXX $next;
 
     my ($match, $position, $count, $method) =
         ([], $self->position, 0, "match_$kind");
-    while (my $return = $self->$method($rule)) {
-        $position = $self->position unless $not;
+    while (my $return = $self->$method($rule, $next)) {
+        $position = $self->position unless $assertion;
         $count++;
-        if ($times =~ /^[1?]$/) {
-            $match = $return;
-            last;
-        }
-        push @$match, $return unless $return eq $Pegex::Ignore;
+        push @$match, @$return;
+        last if $quantity =~ /^[1?]$/;
     }
-    $self->position($position) if $count and $times =~ /^[+*]$/;
-    my $result = (($count or $times =~ /^[?*]$/) ? 1 : 0) ^ $not;
-    $self->position($position) unless $result;
+    if ($quantity =~ /^[+*]$/) {
+        $match = [$match]; # if $count;
+        $self->position($position);
+    }
+    my $result = (($count or $quantity =~ /^[?*]$/) ? 1 : 0)
+        ^ ($assertion == -1);
+    $self->position($position)
+        if not($result) or $assertion;
 
-    $match = $self->callback(($result ? "got" : "not"), $state, $match)
-        if $state and not($has or $not);
-    $match ||= $Pegex::Ignore;
-
+    $match = [] if $next->{'-skip'};
     return ($result ? $match : 0);
 }
 
-sub match_ref {
-    my ($self, $rule) = @_;
-    die "\n\n*** No grammar support for '$rule'\n\n"
-        unless $self->grammar->tree->{$rule};
-    return $self->match_next($self->grammar->tree->{$rule}, $rule);
+sub match_next_with_sep {
+    my ($self, $next) = @_;
+
+    my $quantity = $next->{'+qty'} || '1';
+    my ($rule, $kind) = map {($next->{".$_"}, $_)}
+        grep {$next->{".$_"}} qw(ref rgx all any err) or XXX $next;
+
+    my $separator = $next->{'.sep'};
+    my ($sep_rule, $sep_kind) = map {($separator->{".$_"}, $_)}
+        grep {$separator->{".$_"}} qw(ref rgx all any err) or XXX $separator;
+
+    my ($match, $position, $count, $sep_count, $method, $sep_method) =
+        ([], $self->position, 0, 0, "match_$kind", "match_$sep_kind");
+    while (my $return = $self->$method($rule, $next)) {
+        $position = $self->position;
+        $count++;
+        push @$match, @$return;
+        $return = $self->$sep_method($sep_rule, $separator) or last;
+        push @$match, @$return;
+        $sep_count++;
+    }
+    return ($quantity eq '?') ? [$match] : 0 unless $count;
+    $self->position($position) if $count == $sep_count;
+
+    return [] if $next->{'-skip'};
+    return [$match];
 }
 
+sub match_ref {
+    my ($self, $ref, $parent) = @_;
+    my $rule = $self->grammar->tree->{$ref}
+        or die "\n\n*** No grammar support for '$ref'\n\n";
+
+    my $trace = (not $rule->{'+asr'} and $self->debug);
+    $self->trace("try_$ref") if $trace;
+
+    my $match = $self->match_next($rule);
+    if (not $match) {
+        $self->trace("not_$ref") if $trace;
+        return 0;
+    }
+
+    # Call receiver callbacks
+    $self->trace("got_$ref") if $trace;
+    if (not $rule->{'+asr'} and not $parent->{'-skip'}) {
+        my $callback = "got_$ref";
+        if (my $sub = $self->receiver->can($callback)) {
+            $match = [ $sub->($self->receiver, $match->[0]) ];
+        }
+        elsif ($self->wrap ? not($parent->{'-pass'}) : $parent->{'-wrap'}) {
+            $match = [ @$match ? { $ref => $match->[0] } : () ];
+        }
+    }
+
+    return $match;
+}
+
+my $terminater = 0;
 sub match_rgx {
-    my ($self, $regexp) = @_;
+    my ($self, $regexp, $parent) = @_;
 
     my $start = pos($self->{buffer}) = $self->position;
+    die "Your grammar seems to not terminate at end of stream"
+        if $start >= length $self->{buffer} and $terminater++ > 1000;
     $self->{buffer} =~ /$regexp/g or return 0;
     my $finish = pos($self->{buffer});
     no strict 'refs';
-    my $match = +{ map {($_, $$_)} 1..$#+ };
+    my $match = [ map $$_, 1..$#+ ];
+    $match = [ $match ] if $#+ > 1;
 
     $self->position($finish);
 
@@ -157,19 +216,22 @@ sub match_rgx {
 }
 
 sub match_all {
-    my ($self, $list) = @_;
+    my ($self, $list, $parent) = @_;
     my $pos = $self->position;
     my $set = [];
+    my $len = 0;
     for my $elem (@$list) {
         if (my $match = $self->match_next($elem)) {
-            push @$set, $match unless $match eq $Pegex::Ignore;
+            next if $elem->{'+asr'} or $elem->{'-skip'};
+            push @$set, @$match;
+            $len++;
         }
         else {
             $self->position($pos);
             return 0;
         }
     }
-    return $set->[0] if @$list == 1;
+    $set = [ $set ] if $len > 1;
     return $set;
 }
 
@@ -186,24 +248,6 @@ sub match_any {
 sub match_err {
     my ($self, $error) = @_;
     $self->throw_error($error);
-}
-
-sub callback {
-    my ($self, $adj, $rule, $match) = @_;
-    my $callback = "${adj}_$rule";
-    $self->trace($callback) if $self->debug;
-    return unless $adj eq 'got';
-    my $got;
-    if ($got = $self->receiver->can("got")) {
-        $match = $self->receiver->got($rule, $match);
-    }
-    if ($self->receiver->can($callback)) {
-        return $self->receiver->$callback($match);
-    }
-    elsif (not $got) {
-        return +{ $rule => $match };
-    }
-    return $match;
 }
 
 sub trace {
@@ -224,6 +268,7 @@ sub throw_error {
     my $self = shift;
     my $msg = shift;
     my $line = @{[substr($self->buffer, 0, $self->position) =~ /(\n)/g]} + 1;
+    my $column = $self->position - rindex($self->buffer, "\n", $self->position);
     my $context = substr($self->buffer, $self->position, 50);
     $context =~ s/\n/\\n/g;
     my $position = $self->position;
@@ -231,20 +276,16 @@ sub throw_error {
 Error parsing Pegex document:
   msg: $msg
   line: $line
+  column: $column
   context: "$context"
   position: $position
 ...
-    if ($self->error eq 'die') {
+    if ($self->throw_on_error) {
         require Carp;
         Carp::croak($error);
     }
-    elsif ($self->error eq 'live') {
-        $@ = $error;
-        return;
-    }
-    else {
-        die "Invalid value for Pegex::Parser::error";
-    }
+    $@ = $error;
+    return 0;
 }
 
 1;

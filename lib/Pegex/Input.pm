@@ -6,28 +6,27 @@
 # copyright: 2011
 
 package Pegex::Input;
-use Pegex::Base -base;
+use Pegex::Mo;
 
 has 'string';
 has 'stringref';
 has 'file';
 has 'handle';
 # has 'http';
-has '_buffer' => do { my $x; \$x };
-has '_is_eof' => 0;
-has '_is_open' => 0;
-has '_is_close' => 0;
+has '_buffer' => default => sub { my $x; \$x };
+has '_is_eof' => default => sub { 0 };
+has '_is_open' => default => sub { 0 };
+has '_is_close' => default => sub { 0 };
 # has '_pos' => 0;
 # has 'maxsize' => 4096;
 # has 'minlines' => 2;
 
-sub init {
-    my $self = shift;
+sub new {
+    my $class = shift;
     die "Pegex::Input->new() requires one or 2 arguments"
         unless 1 <= @_ and @_ <= 2;
-    my $method = @_ == 2 ? shift : $self->_guess_input(@_);
-    $self->$method(@_);
-    return $self;
+    my $method = @_ == 2 ? shift : $class->_guess_input(@_);
+    return $class->SUPER::new($method => shift);
 }
 
 # NOTE: Current implementation reads entire input into _buffer on open().
