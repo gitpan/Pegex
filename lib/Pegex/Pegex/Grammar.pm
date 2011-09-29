@@ -5,7 +5,7 @@
 # license:   perl
 # copyright: 2010, 2011
 
-package Pegex::Grammar::Pegex;
+package Pegex::Pegex::Grammar;
 use Pegex::Mo;
 extends 'Pegex::Grammar';
 
@@ -13,39 +13,29 @@ sub tree_ {
   {
     '+top' => 'grammar',
     'all_group' => {
+      '+min' => 1,
       '.ref' => 'rule_part',
       '.sep' => {
         '.rgx' => qr/(?-xism:\G\s*)/
       }
     },
     'any_group' => {
-      '.all' => [
-        {
-          '.ref' => 'rule_part'
-        },
-        {
-          '+qty' => '+',
-          '.all' => [
-            {
-              '.rgx' => qr/(?-xism:\G\s*\|\s*)/
-            },
-            {
-              '.ref' => 'rule_part'
-            }
-          ]
-        }
-      ]
+      '+min' => '2',
+      '.ref' => 'rule_part',
+      '.sep' => {
+        '.rgx' => qr/(?-xism:\G\s*\|\s*)/
+      }
     },
     'bracketed_group' => {
       '.all' => [
         {
-          '.rgx' => qr/(?-xism:\G(\.?)\[\s*)/
+          '.rgx' => qr/(?-xism:\G([\.]?)\[\s*)/
         },
         {
           '.ref' => 'rule_group'
         },
         {
-          '.rgx' => qr/(?-xism:\G\s*\]([\*\+\?]?))/
+          '.rgx' => qr/(?-xism:\G\s*\]((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?))/
         }
       ]
     },
@@ -58,22 +48,19 @@ sub tree_ {
     'grammar' => {
       '.all' => [
         {
-          '+qty' => '+',
-          '.all' => [
-            {
-              '+qty' => '*',
-              '-skip' => 1,
-              '.ref' => 'comment'
-            },
-            {
-              '.ref' => 'rule_definition'
-            }
-          ]
-        },
-        {
-          '+qty' => '*',
+          '+min' => 0,
           '-skip' => 1,
           '.ref' => 'comment'
+        },
+        {
+          '+min' => 1,
+          '.ref' => 'rule_definition',
+          '.sep' => {
+            '+eok' => 1,
+            '+min' => 0,
+            '-skip' => 1,
+            '.ref' => 'comment'
+          }
         }
       ]
     },
@@ -132,25 +119,15 @@ sub tree_ {
       '.rgx' => qr/(?-xism:\G([a-zA-Z]\w*))/
     },
     'rule_part' => {
-      '.all' => [
-        {
-          '.ref' => 'rule_item'
-        },
-        {
-          '+qty' => '?',
-          '.all' => [
-            {
-              '.rgx' => qr/(?-xism:\G\s*\s\*\*\s\s*)/
-            },
-            {
-              '.ref' => 'rule_item'
-            }
-          ]
-        }
-      ]
+      '+max' => '2',
+      '+min' => '1',
+      '.ref' => 'rule_item',
+      '.sep' => {
+        '.rgx' => qr/(?-xism:\G\s*\s(%%?)\s\s*)/
+      }
     },
     'rule_reference' => {
-      '.rgx' => qr/(?-xism:\G([!=\+\-\.]?)<([a-zA-Z]\w*)>([\*\+\?]?))/
+      '.rgx' => qr/(?-xism:\G([!=\+\-\.]?)<([a-zA-Z]\w*)>((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?))/
     }
   }
 }

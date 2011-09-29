@@ -4,12 +4,12 @@
 use TestML -run,
     -require_or_skip => 'YAML::XS';
 
-use Pegex::Compiler::Bootstrap;
+use Pegex::Bootstrap;
 use YAML::XS;
 
 sub bootstrap_compile {
     my $grammar_text = (shift)->value;
-    my $compiler = Pegex::Compiler::Bootstrap->new;
+    my $compiler = Pegex::Bootstrap->new;
     my $tree = $compiler->compile_raw($grammar_text)->tree;
     delete $tree->{'+top'};
     return $tree;
@@ -41,10 +41,10 @@ c: <x>
 
 --- yaml
 a:
-  +qty: +
+  +min: 1
   .all:
   - .ref: b
-  - +qty: '*'
+  - +min: 0
     .ref: c
 b:
   .rgx: x
@@ -63,7 +63,7 @@ a:
 a: <x>*
 --- yaml
 a:
-  +qty: '*'
+  +min: 0
   .ref: x
 
 === Single Rule With Leading Assertion
@@ -121,7 +121,7 @@ a:
 a: [ <x> <y> ]?
 --- yaml
 a:
-  +qty: '?'
+  +max: 1
   .all:
   - .ref: x
   - .ref: y

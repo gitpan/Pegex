@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Pegex::Compiler::AST - Pegex Compiler AST
+Pegex::Pegex::AST - Pegex Pegex AST
 
 =head1 AUTHOR
 

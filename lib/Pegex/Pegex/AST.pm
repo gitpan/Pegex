@@ -1,11 +1,11 @@
 ##
-# name:      Pegex::Compiler::AST
-# abstract:  Pegex Compiler AST
+# name:      Pegex::Pegex::AST
+# abstract:  Pegex Pegex AST
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
 # copyright: 2011
 
-package Pegex::Compiler::AST;
+package Pegex::Pegex::AST;
 use Pegex::Mo;
 extends 'Pegex::Receiver';
 
@@ -13,7 +13,6 @@ use Pegex::Grammar::Atoms;
 
 has 'top';
 has 'extra_rules' => default => sub {+{}};
-use constant wrap => 1;
 
 my %prefixes = (
     '!' => ['+asr', -1],
@@ -47,21 +46,21 @@ sub got_grammar {
 
 sub got_rule_definition {
     my ($self, $match) = @_;
-    my $name = $match->[0]{rule_name};
+    my $name = $match->[0];
     $self->{top} = $name if $name eq 'TOP';
     $self->{top} ||= $name;
-    my $value = $match->[1]{rule_group};
+    my $value = $match->[1];
     return +{ $name => $value };
 }
 
 sub got_bracketed_group {
     my ($self, $match) = @_;
-    my $group = $match->[1]{rule_group};
+    my $group = $match->[1];
     if (my $prefix = $match->[0]) {
         $group->{$prefixes{$prefix}} = 1;
     }
-    if (my $qty = $match->[-1]) {
-        $group->{'+qty'} = $qty;
+    if (my $suffix = $match->[-1]) {
+        $self->set_quantity($group, $suffix);
     }
     return $group;
 }
@@ -88,7 +87,7 @@ sub get_group {
         my $it = shift;
         my $ref = ref($it) or return;
         if ($ref eq 'HASH') {
-            return($it->{rule_item} || ());
+            return($it || ());
         }
         elsif ($ref eq 'ARRAY') {
             return map get($_), @$it;
@@ -102,9 +101,11 @@ sub get_group {
 
 sub got_rule_part {
     my ($self, $part) = @_;
-    my ($rule, $sep) = @$part;
-    if ($sep) {
-        $rule->{rule_item}{'.sep'} = $sep->[0]{rule_item};
+    my ($rule, $sep_op, $sep_rule) = @$part;
+    if ($sep_rule) {
+        $sep_rule->{'+eok'} = 1
+            if $sep_op eq '%%';
+        $rule->{'.sep'} = $sep_rule;
     }
     return $rule;
 }
@@ -116,7 +117,9 @@ sub got_rule_reference {
     if (my $regex = Pegex::Grammar::Atoms->atoms->{$ref}) {
         $self->extra_rules->{$ref} = +{ '.rgx' => $regex };
     }
-    $node->{'+qty'} = $suffix if $suffix;
+    if ($suffix) {
+        $self->set_quantity($node, $suffix);
+    }
     if ($prefix) {
         my ($key, $val) = ($prefixes{$prefix}, 1);
         ($key, $val) = @$key if ref $key;
@@ -133,6 +136,31 @@ sub got_regular_expression {
 sub got_error_message {
     my ($self, $match) = @_;
     return +{ '.err' => $match };
+}
+
+sub set_quantity {
+    my ($self, $object, $quantifier) = @_;
+    if ($quantifier eq '*') {
+        $object->{'+min'} = 0;
+    }
+    elsif ($quantifier eq '+') {
+        $object->{'+min'} = 1;
+    }
+    elsif ($quantifier eq '?') {
+        $object->{'+max'} = 1;
+    }
+    elsif ($quantifier =~ /^(\d+)\+$/) {
+        $object->{'+min'} = $1;
+    }
+    elsif ($quantifier =~ /^(\d+)\-(\d+)+$/) {
+        $object->{'+min'} = $1;
+        $object->{'+max'} = $2;
+    }
+    elsif ($quantifier =~ /^(\d+)$/) {
+        $object->{'+min'} = $1;
+        $object->{'+max'} = $1;
+    }
+    else { die "Invalid quantifier: '$quantifier'" }
 }
 
 1;

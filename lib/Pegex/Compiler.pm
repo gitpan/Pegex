@@ -9,8 +9,8 @@ package Pegex::Compiler;
 use Pegex::Mo;
  
 use Pegex::Parser;
-use Pegex::Grammar::Pegex;
-use Pegex::Compiler::AST;
+use Pegex::Pegex::Grammar;
+use Pegex::Pegex::AST;
 use Pegex::Grammar::Atoms;
 
 has 'tree';
@@ -37,9 +37,9 @@ sub compile_raw {
 }
 
 sub parse {
-    if ($Pegex::Compiler::Bootstrap) {
-        require Pegex::Compiler::Bootstrap;
-        $_[0] = Pegex::Compiler::Bootstrap->new;
+    if ($Pegex::Bootstrap) {
+        require Pegex::Bootstrap;
+        $_[0] = Pegex::Bootstrap->new;
         my $self = shift;
         return $self->parse(@_)
     }
@@ -48,8 +48,8 @@ sub parse {
     $self = $self->new unless ref $self;
 
     my $parser = Pegex::Parser->new(
-        grammar => Pegex::Grammar::Pegex->new,
-        receiver => Pegex::Compiler::AST->new,
+        grammar => Pegex::Pegex::Grammar->new,
+        receiver => Pegex::Pegex::AST->new,
     );
 
     $self->tree($parser->parse(@_));

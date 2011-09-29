@@ -20,10 +20,9 @@ no_index:
     - t
     - xt
 requires:
-  Mo: 0.23
   perl: 5.10.0
 resources:
   homepage: http://github.com/ingydotnet/pegex-pm/tree
   license: http://dev.perl.org/licenses/
   repository: git://github.com/ingydotnet/pegex-pm.git
-version: 0.17
+version: 0.18

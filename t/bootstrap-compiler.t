@@ -1,8 +1,9 @@
+# BEGIN { $Pegex::Bootstrap = 1 }
 # BEGIN { $Pegex::Parser::Debug = 1 }
 use t::TestPegex;
 
 use Pegex::Compiler;
-use Pegex::Compiler::Bootstrap;
+use Pegex::Bootstrap;
 # use XXX;
 
 sub run {
@@ -23,12 +24,13 @@ sub pegex_compile {
 
 sub bootstrap_compile {
     my $grammar_text = shift;
-    Pegex::Compiler::Bootstrap->new->parse($grammar_text)->tree;
+    Pegex::Bootstrap->new->parse($grammar_text)->tree;
 }
 
 sub fixup {
     my $yaml = shift;
     $yaml =~ s/\A---\s\+top.*\n//;
+    $yaml =~ s/'(\d+)'/$1/g;
     return $yaml;
 }
 
@@ -38,7 +40,7 @@ sub yaml {
 
 __DATA__
 
-plan: 22
+plan: 26
 
 blocks:
 - title: Single Regex
@@ -81,7 +83,7 @@ blocks:
         a: <b>*
     compile: |
         a:
-          +qty: '*'
+          +min: 0
           .ref: b
 
 - title: Negative and Positive Assertion
@@ -105,17 +107,17 @@ blocks:
           .all:
           - -skip: 1
             .ref: b
-          - +qty: +
+          - +min: 1
             -wrap: 1
             .ref: c
-          - +qty: '?'
+          - +max: 1
             -pass: 1
             .ref: d
 
 - title: List Separator
   points:
     grammar: |
-        a: <b> | <c> ** /d/
+        a: <b> | <c> % /d/
     compile: |
         a:
           .any:
@@ -127,14 +129,15 @@ blocks:
 - title: List Separator
   points:
     grammar: |
-        a: <b> | <c>? ** /d/
+        a: <b> | <c>? %% /d/
     compile: |
         a:
           .any:
           - .ref: b
-          - +qty: '?'
+          - +max: 1
             .ref: c
             .sep:
+              +eok: 1
               .rgx: d
 
 - title: Bracketed
@@ -145,7 +148,7 @@ blocks:
         a:
           .all:
           - .ref: b
-          - +qty: '?'
+          - +max: 1
             .all:
             - .ref: c
             - .ref: d
@@ -162,3 +165,46 @@ blocks:
             .all:
             - .ref: c
             - .ref: d
+
+- title: All Quantifier Forms
+  points:
+    grammar: |
+        a: <b> <c>? <d>* <e>+ <f>55 <g>5+ <h>5-55
+    compile: |
+        a:
+          .all:
+          - .ref: b
+          - +max: 1
+            .ref: c
+          - +min: 0
+            .ref: d
+          - +min: 1
+            .ref: e
+          - +max: 55
+            +min: 55
+            .ref: f
+          - +min: 5
+            .ref: g
+          - +max: 55
+            +min: 5
+            .ref: h
+
+- title: Separators with Quantifiers
+  points:
+    grammar: |
+        a: <b>2+ % <c>* <d>* %% <e>2-3
+    compile: |
+        a:
+          .all:
+          - +min: 2
+            .ref: b
+            .sep:
+              +min: 0
+              .ref: c
+          - +min: 0
+            .ref: d
+            .sep:
+              +eok: 1
+              +max: 3
+              +min: 2
+              .ref: e

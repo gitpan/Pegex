@@ -5,21 +5,21 @@
 # license:   perl
 # copyright: 2010, 2011
 # see:
-# - Pegex::Regex
+# - Pegex::Manual
 # - Pegex::Grammar
+# - Pegex::Regex
 # - http://github.com/ingydotnet/pegex-pm
 # - irc.freenode.net#pegex
 
 use 5.010;
 use strict;
 use warnings;
-use Mo 0.23 ();
 
 package Pegex;
 
 use Pegex::Grammar;
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 sub import {
     no strict 'refs';
@@ -188,7 +188,7 @@ For a different view of the data tree, try:
 
 Finally to emulate the Pegex compiler do this:
 
-    perl -MXXX -MPegex -e 'XXX pegex("pegex.pgx", {receiver => "Pegex::Compiler::AST"})->parse("pegex.pgx")'
+    perl -MXXX -MPegex -e 'XXX pegex("pegex.pgx", {receiver => "Pegex::Pegex::AST"})->parse("pegex.pgx")'
 
 This specifies a "receiving" class that can shape the results into something
 useful. Indeed, this is the exact guts of L<Pegex::Grammar::Pegex>.

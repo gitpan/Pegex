@@ -1,27 +1,35 @@
 ##
-# name:      Pegex::Compiler::Bootstrap
+# name:      Pegex::Bootstrap
 # abstract:  Bootstrapping Compiler for a Pegex Grammar
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
 # copyright: 2010, 2011
 
-package Pegex::Compiler::Bootstrap;
+package Pegex::Bootstrap;
 use Pegex::Mo;
 extends 'Pegex::Compiler';
 
 use Pegex::Grammar::Atoms;
 
+my $quantifier = qr{(?:[\?\*\+]|\d+(?:\+|\-\d+)?)};
+
 sub parse {
     my $self = shift;
     $self = $self->new unless ref $self;
     my $grammar_text = shift;
+    if ($grammar_text !~ /[\n\:]/) {
+        open IN, $grammar_text
+            or die "Can't open file '$grammar_text' for input";
+        $grammar_text = do {local $/; <IN>};
+        close IN;
+    }
     $self->tree({});
     $grammar_text =~ s/^#.*\n+//gm;
     $grammar_text =~ s/^\s*\n//;
     $grammar_text .= "\n" unless $grammar_text =~ /\n\z/;
     $grammar_text =~ s/;/\n/g;
     for my $rule (split /(?=^\w+:\s*)/m, $grammar_text) {
-        (my $value = $rule) =~ s/^(\w+):// or die;
+        (my $value = $rule) =~ s/^(\w+):// or die "$rule";
         my $key = $1;
         $value =~ s/\s+/ /g;
         $value =~ s/^\s*(.*?)\s*$/$1/;
@@ -33,16 +41,15 @@ sub parse {
     for my $rule (sort keys %{$self->tree}) {
         next if $rule =~ /^\+/;
         my $text = $self->tree->{$rule};
-        my @tokens = ($text =~ m{(
-            /[^/]*/ |
-            \*\* |
-            [\!\=\-\+\.]?<\w+>[\?\*\+]? |
-            `[^`]*` |
+        my @tokens = grep $_,
+        ($text =~ m{(
+            /[^/\n]*/ |
+            %%? |
+            [\!\=\-\+\.]?<\w+>$quantifier? |
+            `[^`\n]*` |
             \| |
             [\!\=?\.]?\[ |
-            \][\?\*\+]? |
-            \([\!\=?]? |
-            \)[\?\*\+]?
+            \]$quantifier? |
         )}gx);
         die "No tokens found for rule <$rule> => '$text'"
             unless @tokens;
@@ -79,8 +86,8 @@ sub wilt {
     return $branch unless ref($branch) eq 'ARRAY';
     my $wilted = [];
     for (my $i = 0; $i < @$branch; $i++) {
-        push @$wilted, ($branch->[$i] eq '**')
-            ? ['**', pop(@$wilted), $branch->[++$i]]
+        push @$wilted, ($branch->[$i] =~ /^%%?$/)
+            ? [$branch->[$i], pop(@$wilted), $branch->[++$i]]
             : $branch->[$i];
     }
     return $wilted;
@@ -90,7 +97,7 @@ sub compile_next {
     my $self = shift;
     my $node = shift;
     my $unit = ref($node) ?
-        $node->[0] eq '**'
+        $node->[0] =~ /^%%?$/
             ? $self->compile_sep($node) :
         $node->[2] eq '|'
             ? $self->compile_group($node, 'any')
@@ -99,7 +106,7 @@ sub compile_next {
         $node =~ m!/! ? $self->compile_re($node) :
         $node =~ m!<! ? $self->compile_rule($node) :
         $node =~ m!`! ? $self->compile_error($node) :
-            die $node;
+            XXX $node;
 
     while (defined $unit->{'.all'} and @{$unit->{'.all'}} == 1) {
         $unit = $unit->{'.all'}->[0];
@@ -120,6 +127,7 @@ sub compile_sep {
     my $node = shift;
     my $object = $self->compile_next($node->[1]);
     $object->{'.sep'} = $self->compile_next($node->[2]);
+    $object->{'.sep'}{'+eok'} = 1 if $node->[0] eq '%%';
     return $object;
 }
 
@@ -134,8 +142,8 @@ sub compile_group {
         ($key, $val) = @$key if ref $key;
         $object->{$key} = $val;
     }
-    if ($node->[-1] =~ /([\?\*\+])$/ and not $object->{'+qty'}) {
-        $object->{'+qty'} = $1;
+    if ($node->[-1] =~ /([\?\*\+])$/) {
+        $self->set_quantity($object, $1);
     }
     shift @$node;
     pop @$node;
@@ -150,6 +158,31 @@ sub compile_group {
         ];
     }
     return $object;
+}
+
+sub set_quantity {
+    my ($self, $object, $quantifier) = @_;
+    if ($quantifier eq '*') {
+        $object->{'+min'} = 0;
+    }
+    elsif ($quantifier eq '+') {
+        $object->{'+min'} = 1;
+    }
+    elsif ($quantifier eq '?') {
+        $object->{'+max'} = 1;
+    }
+    elsif ($quantifier =~ /^(\d+)\+$/) {
+        $object->{'+min'} = $1;
+    }
+    elsif ($quantifier =~ /^(\d+)\-(\d+)+$/) {
+        $object->{'+min'} = $1;
+        $object->{'+max'} = $2;
+    }
+    elsif ($quantifier =~ /^(\d+)$/) {
+        $object->{'+min'} = $1;
+        $object->{'+max'} = $1;
+    }
+    else { die "Invalid quantifier: '$quantifier'" }
 }
 
 sub compile_re {
@@ -170,15 +203,14 @@ sub compile_rule {
         ($key, $val) = @$key if ref $key;
         $object->{$key} = $val;
     }
-    if ($node =~ s/([\?\*\+])$// and not $object->{'+qty'}) {
-        $object->{'+qty'} = $1;
+    if ($node =~ s/($quantifier)$//) {
+        $self->set_quantity($object, $1);
     }
-    $node =~ s!^<(.*)>$!$1! or die;
+    $node =~ s!^<(.*)>$!$1! or XXX $node;
     $object->{'.ref'} = $node;
     if (defined(my $re = Pegex::Grammar::Atoms->atoms->{$node})) {
         $self->tree->{$node} ||= {'.rgx' => $re};
     }
-
     return $object;
 }
 
