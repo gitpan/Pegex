@@ -3,47 +3,48 @@
 # abstract:  Pegex Grammar for the Pegex Grammar Language
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
-# copyright: 2010, 2011
+# copyright: 2010, 2011, 2012
 
 package Pegex::Pegex::Grammar;
 use Pegex::Mo;
 extends 'Pegex::Grammar';
 
-sub tree_ {
+use constant file => '../pegex-pgx/pegex.pgx';
+
+sub make_tree {
   {
-    '+top' => 'grammar',
+    '+grammar' => 'pegex',
+    '+toprule' => 'grammar',
+    '+version' => '0.1.0',
     'all_group' => {
       '+min' => 1,
       '.ref' => 'rule_part',
       '.sep' => {
-        '.rgx' => qr/(?-xism:\G\s*)/
+        '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)*)/
       }
     },
     'any_group' => {
       '+min' => '2',
       '.ref' => 'rule_part',
       '.sep' => {
-        '.rgx' => qr/(?-xism:\G\s*\|\s*)/
+        '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)*\|(?:\s|\#.*\n)*)/
       }
     },
     'bracketed_group' => {
       '.all' => [
         {
-          '.rgx' => qr/(?-xism:\G([\.]?)\[\s*)/
+          '.rgx' => qr/(?-xism:\G(\.?)\((?:\s|\#.*\n)*)/
         },
         {
           '.ref' => 'rule_group'
         },
         {
-          '.rgx' => qr/(?-xism:\G\s*\]((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?))/
+          '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)*\)((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?))/
         }
       ]
     },
-    'comment' => {
-      '.rgx' => qr/(?-xism:\G(?:[\ \t]*\r?\n|\#.*\r?\n))/
-    },
     'ending' => {
-      '.rgx' => qr/(?-xism:\G\s*?(?:\n\s*|;\s*|\z))/
+      '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)*?(?:\n(?:\s|\#.*\n)*|;(?:\s|\#.*\n)*|\z))/
     },
     'error_message' => {
       '.rgx' => qr/(?-xism:\G`([^`\r\n]*)`)/
@@ -59,51 +60,26 @@ sub tree_ {
       ]
     },
     'meta_definition' => {
-      '.all' => [
-        {
-          '.rgx' => qr/(?-xism:\G%)/
-        },
-        {
-          '.ref' => 'meta_name'
-        },
-        {
-          '.rgx' => qr/(?-xism:\G[\ \t]+)/
-        },
-        {
-          '.ref' => 'meta_value'
-        }
-      ]
-    },
-    'meta_name' => {
-      '.rgx' => qr/(?-xism:\G(grammar|extends|include|version))/
+      '.rgx' => qr/(?-xism:\G%(grammar|extends|include|version)[\ \t]+[\ \t]*([^;\n]*?)[\ \t]*(?:\s|\#.*\n)*?(?:\n(?:\s|\#.*\n)*|;(?:\s|\#.*\n)*|\z))/
     },
     'meta_section' => {
       '+min' => 0,
-      '.ref' => 'meta_definition',
-      '.sep' => {
-        '+bok' => 1,
-        '+eok' => 1,
-        '+min' => 0,
-        '-skip' => 1,
-        '.ref' => 'comment'
-      }
-    },
-    'meta_value' => {
-      '.rgx' => qr/(?-xism:\G[\ \t]*([^;\n]*?)[\ \t]*\s*?(?:\n\s*|;\s*|\z))/
+      '.any' => [
+        {
+          '.ref' => 'meta_definition'
+        },
+        {
+          '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)+)/
+        }
+      ]
     },
     'regular_expression' => {
-      '.rgx' => qr/(?-xism:\G\/([^\/\r\n]*)\/)/
+      '.rgx' => qr/(?-xism:\G\/([^\/]*)\/)/
     },
     'rule_definition' => {
       '.all' => [
         {
-          '.rgx' => qr/(?-xism:\G\s*)/
-        },
-        {
-          '.ref' => 'rule_name'
-        },
-        {
-          '.rgx' => qr/(?-xism:\G[\ \t]*:\s*)/
+          '.ref' => 'rule_start'
         },
         {
           '.ref' => 'rule_group'
@@ -135,34 +111,40 @@ sub tree_ {
           '.ref' => 'bracketed_group'
         },
         {
+          '.ref' => 'whitespace_token'
+        },
+        {
           '.ref' => 'error_message'
         }
       ]
-    },
-    'rule_name' => {
-      '.rgx' => qr/(?-xism:\G([a-zA-Z]\w*))/
     },
     'rule_part' => {
       '+max' => '2',
       '+min' => '1',
       '.ref' => 'rule_item',
       '.sep' => {
-        '.rgx' => qr/(?-xism:\G\s*\s(%{1,3})\s\s*)/
+        '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)+(%{1,2})(?:\s|\#.*\n)+)/
       }
     },
     'rule_reference' => {
-      '.rgx' => qr/(?-xism:\G([!=\+\-\.]?)<([a-zA-Z]\w*)>((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?))/
+      '.rgx' => qr/(?-xism:\G([!=\+\-\.]?)(?:([a-zA-Z]\w*\b)|(?:<([a-zA-Z]\w*\b)>))((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?)(?![\ \t]*:))/
     },
     'rule_section' => {
-      '+min' => 1,
-      '.ref' => 'rule_definition',
-      '.sep' => {
-        '+bok' => 1,
-        '+eok' => 1,
-        '+min' => 0,
-        '-skip' => 1,
-        '.ref' => 'comment'
-      }
+      '+min' => 0,
+      '.any' => [
+        {
+          '.ref' => 'rule_definition'
+        },
+        {
+          '.rgx' => qr/(?-xism:\G(?:\s|\#.*\n)+)/
+        }
+      ]
+    },
+    'rule_start' => {
+      '.rgx' => qr/(?-xism:\G([a-zA-Z]\w*\b)[\ \t]*:(?:\s|\#.*\n)*)/
+    },
+    'whitespace_token' => {
+      '.rgx' => qr/(?-xism:\G(\~+))/
     }
   }
 }

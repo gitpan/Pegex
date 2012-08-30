@@ -30,7 +30,7 @@ sub bootstrap_compile {
 sub fixup {
     my $yaml = shift;
     $yaml =~ s/\A---\s//;
-    $yaml =~ s/\A\+top.*\n//;
+    $yaml =~ s/\A\+toprule.*\n//;
     $yaml =~ s/'(\d+)'/$1/g;
     return $yaml;
 }
@@ -41,7 +41,7 @@ sub yaml {
 
 __DATA__
 
-plan: 30
+plan: 28
 
 blocks:
 - title: Single Regex
@@ -144,7 +144,7 @@ blocks:
 - title: Bracketed
   points:
     grammar: |
-        a: <b> [ <c> <d> ]?
+        a: <b> ( <c> <d> )?
     compile: |
         a:
           .all:
@@ -157,7 +157,7 @@ blocks:
 - title: Skip Bracketed
   points:
     grammar: |
-        a: <b> .[ <c> <d> ]
+        a: <b> .( <c> <d> )
     compile: |
         a:
           .all:
@@ -210,20 +210,6 @@ blocks:
               +min: 2
               .ref: e
 
-- title: Before OK Separator
-  points:
-    grammar: |
-        a: <b>+ %%% <c>*
-    compile: |
-        a:
-          +min: 1
-          .ref: b
-          .sep:
-            +bok: 1
-            +eok: 1
-            +min: 0
-            .ref: c
-
 - title: Meta Lines
   points:
     grammar: |
@@ -236,7 +222,7 @@ blocks:
         +extends: bar bar
         +grammar: foo
         +include: bazzy
-        +top: a
+        +toprule: a
         +version: 1.1.1
         a:
           .rgx: b

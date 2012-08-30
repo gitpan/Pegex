@@ -6,17 +6,10 @@ Pegex::Input - Pegex Parser Input Abstraction
 
 =head1 SYNOPSIS
 
-This:
-
     use Pegex;
     use Pegex::Input;
     my $ast = pegex(Pegex::Input->new(file => 'foo-grammar-file.pgx'))
         ->parse(Pegex::Input->new(string => $foo_input));
-
-is the long way to do this:
-
-    use Pegex;
-    my $ast = pegex('foo-grammar-file.pgx')->parse($foo_input);
 
 =head1 DESCRIPTION
 
@@ -30,29 +23,11 @@ you'll need to use a Pegex::Input object.
 
 =head1 USAGE
 
-There are 2 ways to create a Pegex::Input object. You can call new() with two
-arguments, where the first argument is the input type:
+You call new() with two arguments, where the first argument is the input type:
 
     Pegex::Input->new(file => 'file.txt')
 
-or you can call new() with no type specifier and let it guess.
-
-    Pegex::Input->new($somesuch)
-
-The second form is usually used internally when you call a Pegex facility,
-like these:
-
-    pegex($somesuch)->parse($someothersuch);
-    Pegex::Grammar::Foo->parse($somefoo);
-
-It is nice syntax to not need to specify the type when it is obvious.
-Sometimes it is not obvious and you need to use Pegex::Input directly:
-
-    pegex(Pegex::Input(file => $somesuch))
-        ->parse(Pegex::Input->new(stringref => $someothersuch));
-    Pegex::Grammar::Foo->parse(Pegex::Input->new(handle => $somefoo));
-
-If you do specify the type, use one of these:
+The following input types are available:
 
 =over
 
@@ -80,7 +55,7 @@ Ingy döt Net <ingy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2011. Ingy döt Net.
+Copyright (c) 2011, 2012. Ingy döt Net.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

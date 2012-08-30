@@ -11,7 +11,7 @@ sub bootstrap_compile {
     my $grammar_text = (shift)->value;
     my $compiler = Pegex::Bootstrap->new;
     my $tree = $compiler->parse($grammar_text)->combinate->tree;
-    delete $tree->{'+top'};
+    delete $tree->{'+toprule'};
     return $tree;
 }
 
@@ -21,21 +21,25 @@ sub yaml {
 
 sub clean {
     my $yaml = (shift)->value;
-    $yaml =~ s/^---\n//;
+    $yaml =~ s/^---\s//;
     return $yaml;
 }
 
 __DATA__
 %TestML 1.0
 
-Plan = 12;
+Plan = 18;
 
 *grammar.bootstrap_compile.yaml.clean == *yaml;
 
+=== Empty Grammar
+--- grammar
+--- yaml
+{}
 
 === Simple Grammar
 --- grammar
-a: [ <b> <c>* ]+
+a: ( <b> <c>* )+
 b: /x/
 c: <x>
 
@@ -58,9 +62,24 @@ a: <x>
 a:
   .ref: x
 
+=== Single Rule with no brackets
+--- grammar
+a: x
+--- yaml
+a:
+  .ref: x
+
 === Single Rule With Trailing Quantifier
 --- grammar
 a: <x>*
+--- yaml
+a:
+  +min: 0
+  .ref: x
+
+=== Single Rule With Trailing Quantifier (no angles)
+--- grammar
+a: x*
 --- yaml
 a:
   +min: 0
@@ -109,7 +128,7 @@ a:
 
 === Bracketed All Group
 --- grammar
-a: [ <x> <y> ]
+a: ( <x> <y> )
 --- yaml
 a:
   .all:
@@ -118,7 +137,7 @@ a:
 
 === Bracketed Group With Trailing Modifier
 --- grammar
-a: [ <x> <y> ]?
+a: ( <x> <y> )?
 --- yaml
 a:
   +max: 1
@@ -128,10 +147,10 @@ a:
 
 === Bracketed Group With Leading Modifier
 --- grammar
-a: ![ =<x> <y> ]
+a: .( =<x> <y> )
 --- yaml
 a:
-  +asr: -1
+  -skip: 1
   .all:
   - +asr: 1
     .ref: x
@@ -139,7 +158,7 @@ a:
 
 === Multiple Groups
 --- grammar
-a: [ <x> <y> ] [ <z> | /.../ ]
+a: ( <x> <y> ) ( <z> | /.../ )
 --- yaml
 a:
   .all:
@@ -150,3 +169,32 @@ a:
     - .ref: z
     - .rgx: '...'
 
+=== Whitespace in Regex
+--- grammar
+a: /<DOT>* (<DASH>{3})
+    <BANG>   <BANG>
+   /
+--- yaml
+a:
+  .rgx: \.*(\-{3})!!
+
+=== Directives
+--- grammar
+\%grammar foo
+\%version 1.2.3
+
+--- yaml
++grammar: foo
++version: 1.2.3
+
+=== Multiple Duplicate Directives
+--- grammar
+\%grammar foo
+\%include bar
+\%include baz
+
+--- yaml
++grammar: foo
++include:
+- bar
+- baz

@@ -3,11 +3,11 @@
 # abstract:  Pegex Compiler
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
-# copyright: 2011
+# copyright: 2011, 2012
 
 package Pegex::Compiler;
 use Pegex::Mo;
- 
+
 use Pegex::Parser;
 use Pegex::Pegex::Grammar;
 use Pegex::Pegex::AST;
@@ -16,33 +16,30 @@ use Pegex::Grammar::Atoms;
 has 'tree';
 
 sub compile {
-    my $self = shift;
-    $self = $self->new unless ref $self;
+    my ($self, $grammar) = @_;
 
-    $self->parse(shift);
+    # Global request to use the Pegex bootstrap compiler
+    if ($Pegex::Bootstrap) {
+        require Pegex::Bootstrap;
+        $self = Pegex::Bootstrap->new;
+    }
+
+    $self->parse($grammar);
     $self->combinate;
-    $self->perlify;
+    $self->native;
 
     return $self;
 }
 
 sub parse {
-    if ($Pegex::Bootstrap) {
-        require Pegex::Bootstrap;
-        $_[0] = Pegex::Bootstrap->new;
-        my $self = shift;
-        return $self->parse(@_)
-    }
-
-    my $self = shift;
-    $self = $self->new unless ref $self;
+    my ($self, $input) = @_;
 
     my $parser = Pegex::Parser->new(
         grammar => Pegex::Pegex::Grammar->new,
         receiver => Pegex::Pegex::AST->new,
     );
 
-    $self->tree($parser->parse(@_));
+    $self->tree($parser->parse($input));
 
     return $self;
 }
@@ -53,8 +50,9 @@ sub parse {
 has '_tree';
 
 sub combinate {
-    my $self = shift;
-    my $rule = shift || $self->tree->{'+top'};
+    my ($self, $rule) = @_;
+    $rule ||= $self->tree->{'+toprule'}
+        or return $self;
     $self->_tree({
         map {($_, $self->tree->{$_})} grep { /^\+/ } keys %{$self->tree}
     });
@@ -65,8 +63,7 @@ sub combinate {
 }
 
 sub combinate_rule {
-    my $self = shift;
-    my $rule = shift;
+    my ($self, $rule) = @_;
     return if exists $self->_tree->{$rule};
 
     my $object = $self->_tree->{$rule} = $self->tree->{$rule};
@@ -74,8 +71,7 @@ sub combinate_rule {
 }
 
 sub combinate_object {
-    my $self = shift;
-    my $object = shift;
+    my ($self, $object) = @_;
     if (my $sub = $object->{'.sep'}) {
         $self->combinate_object($sub);
     }
@@ -107,13 +103,11 @@ sub combinate_object {
 }
 
 sub combinate_re {
-    my $self = shift;
-    my $regexp = shift;
+    my ($self, $regexp) = @_;
     my $atoms = Pegex::Grammar::Atoms->atoms;
-    $regexp->{'.rgx'} =~ s!~!<ws>!g;
     my $re = $regexp->{'.rgx'};
-    $re =~ s!~!<ws>!g;
     while (1) {
+        $re =~ s[(?<!\\)(~+)]['<ws' . length($1) . '>']ge;
         $re =~ s[<(\w+)>][
             $self->tree->{$1} and
             $self->tree->{$1}{'.rgx'}
@@ -126,17 +120,16 @@ sub combinate_re {
 }
 
 #------------------------------------------------------------------------------#
-# Perlify regexes
+# Compile to native Perl regexes
 #------------------------------------------------------------------------------#
-sub perlify {
-    my $self = shift;
+sub native {
+    my ($self) = @_;
     $self->perl_regexes($self->tree);
     return $self;
 }
 
 sub perl_regexes {
-    my $self = shift;
-    my $node = shift;
+    my ($self, $node) = @_;
     if (ref($node) eq 'HASH') {
         if (exists $node->{'.rgx'}) {
             my $re = $node->{'.rgx'};
@@ -175,7 +168,11 @@ sub to_perl {
     $Data::Dumper::Terse = 1;
     $Data::Dumper::Indent = 1;
     $Data::Dumper::Sortkeys = 1;
-    return Data::Dumper::Dumper($self->tree);
+    my $perl = Data::Dumper::Dumper($self->tree);
+    $perl =~ s/\?\^:/?-xism:/g;
+    die "to_perl failed with non compatible regex in:\n$perl"
+        if $perl =~ /\?\^/;
+    return $perl;
 }
 
 1;

@@ -55,9 +55,6 @@ MANIFEST			This list of files
 META.yml
 Notes
 README
-src/grammar.pl
-src/Makefile
-src/pegex.pgx
 t/ast.t
 t/bootstrap-ast.t
 t/bootstrap-compiler.t
@@ -65,7 +62,9 @@ t/bootstrap-receiver.t
 t/common.yaml
 t/compiler-checks.t
 t/compiler.t
+t/error.t
 t/export_api.t
+t/flatten.t
 t/grammar_api.t
 t/mice.pgx
 t/parse.t

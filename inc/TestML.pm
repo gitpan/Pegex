@@ -4,7 +4,7 @@
 # author:    Ingy döt Net <ingy@cpan.org>
 # abstract:  A Generic Software Testing Meta Language
 # license:   perl
-# copyright: 2009, 2010, 2011
+# copyright: 2009, 2010, 2011, 2012
 # see:
 # - http://www.testml.org/
 # - irc://irc.freenode.net#testml 
@@ -14,14 +14,14 @@ use strict;
 use warnings;
 
 my $requires = "
-use Pegex 0.19 ();
+use Pegex 0.20 ();
 ";
 
 package TestML;
 
 use TestML::Runtime;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 use constant XXX_skip => 1;
 our $DumpModule = 'YAML::XS';
@@ -120,7 +120,7 @@ sub import {
     *{$p.'::bool'} = \&bool;
     *{$p.'::list'} = \&list;
 
-    if (not defined &{$pkg.'::XXX'}) {
+    if (not defined &{$p.'::XXX'}) {
         *{$p.'::WWW'} = \&WWW;
         *{$p.'::XXX'} = \&XXX;
         *{$p.'::YYY'} = \&YYY;

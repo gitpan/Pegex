@@ -3,7 +3,7 @@
 # abstract:  Pegex Pegex AST
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
-# copyright: 2011
+# copyright: 2011, 2012
 
 package Pegex::Pegex::AST;
 use Pegex::Mo;
@@ -11,7 +11,7 @@ extends 'Pegex::Receiver';
 
 use Pegex::Grammar::Atoms;
 
-has 'top';
+has 'toprule';
 has 'extra_rules' => default => sub {+{}};
 
 my %prefixes = (
@@ -23,7 +23,7 @@ my %prefixes = (
 );
 
 # Uncomment this to debug. See entire raw AST.
-# sub finalize {
+# sub final {
 #     my ($self, $match) = @_;
 #     XXX $match;
 # }
@@ -35,7 +35,7 @@ sub got_grammar {
     my ($self, $rules) = @_;
     my ($meta_section, $rule_section) = @$rules;
     my $grammar = {
-        '+top' => $self->top,
+        '+toprule' => $self->toprule,
         %{$self->extra_rules},
         %$meta_section,
     };
@@ -50,7 +50,20 @@ sub got_meta_section {
     my ($self, $directives) = @_;
     my $meta = {};
     for my $next (@$directives) {
-        $meta->{"+$next->[0]"} = $next->[1];
+        my ($key, $val) = @$next;
+        $key = "+$key";
+        my $old = $meta->{$key};
+        if (defined $old) {
+            if (ref $old) {
+                push @$old, $val;
+            }
+            else {
+                $meta->{$key} = [ $old, $val ];
+            }
+        }
+        else {
+            $meta->{$key} = $val;
+        }
     }
     return $meta;
 }
@@ -58,8 +71,8 @@ sub got_meta_section {
 sub got_rule_definition {
     my ($self, $match) = @_;
     my $name = $match->[0];
-    $self->{top} = $name if $name eq 'TOP';
-    $self->{top} ||= $name;
+    $self->{toprule} = $name if $name eq 'TOP';
+    $self->{toprule} ||= $name;
     my $value = $match->[1];
     return +{ $name => $value };
 }
@@ -70,7 +83,7 @@ sub got_bracketed_group {
     if (my $prefix = $match->[0]) {
         $group->{$prefixes{$prefix}} = 1;
     }
-    if (my $suffix = $match->[-1]) {
+    if (my $suffix = $match->[2]) {
         $self->set_quantity($group, $suffix);
     }
     return $group;
@@ -115,9 +128,7 @@ sub got_rule_part {
     my ($rule, $sep_op, $sep_rule) = @$part;
     if ($sep_rule) {
         $sep_rule->{'+eok'} = 1
-            if $sep_op =~ /^%%%?$/;
-        $sep_rule->{'+bok'} = 1
-            if $sep_op eq '%%%';
+            if $sep_op eq '%%';
         $rule->{'.sep'} = $sep_rule;
     }
     return $rule;
@@ -125,7 +136,8 @@ sub got_rule_part {
 
 sub got_rule_reference {
     my ($self, $match) = @_;
-    my ($prefix, $ref, $suffix) = @$match;
+    my ($prefix, $ref1, $ref2, $suffix) = @$match;
+    my $ref = $ref1 || $ref2;
     my $node = +{ '.ref' => $ref };
     if (my $regex = Pegex::Grammar::Atoms->atoms->{$ref}) {
         $self->extra_rules->{$ref} = +{ '.rgx' => $regex };
@@ -143,7 +155,16 @@ sub got_rule_reference {
 
 sub got_regular_expression {
     my ($self, $match) = @_;
+    $match =~ s/\s*#.*\n//g;
+    $match =~ s/\s+//g;
+    $match =~ s!\((\:|\=|\!)!(?$1!g;
     return +{ '.rgx' => $match };
+}
+
+sub got_whitespace_token {
+    my ($self, $match) = @_;
+    my $regex = '<ws' . length($match) . '>';
+    return +{ '.rgx' => $regex };
 }
 
 sub got_error_message {

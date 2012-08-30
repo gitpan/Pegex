@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Pegex - Pegex Parser Generator
+Pegex - Acmeist PEG Parsing Framework
 
 =head1 SYNOPSIS
 
@@ -15,14 +15,25 @@ or with regular expression sugar:
     $input =~ qr{$grammar}x;
     my $data = \%/;
 
+or with options:
+
+    use Pegex;
+    use ReceiverClass;
+    my $parser = pegex($grammar, {receiver => 'ReceiverClass'});
+    my $data = $parser->parse(input);
+
 or more explicitly:
 
+    use Pegex::Parser;
     use Pegex::Grammar;
     use Pegex::Compiler;
     my $pegex_grammar = Pegex::Grammar->new(
         tree => Pegex::Compiler->compile($grammar)->tree,
     );
-    my $data = $pegex_grammar->parse($input);
+    my $parser = Pegex::Parser->new(
+        grammar => $pegex_grammar,
+    );
+    my $data = $parser->parse($input);
 
 or customized explicitly:
 
@@ -41,10 +52,13 @@ or customized explicitly:
     got_other_rule { ... }
 
     package main;
-    use MyGrammar;
-    my $grammar = MyGrammar->new();
-    $grammar->parse($input);
-    my $data = $receiver->data;
+    use Pegex::Parser;
+    my $parser = Pegex::Parser->new(
+        grammar => MyGrammar->new,
+        receiver => MyReceiver->new,
+    );
+    $parser->parse($input);
+    my $data = $parser->receiver->data;
 
 =head1 DESCRIPTION
 
@@ -70,11 +84,13 @@ environments.
 The C<Pegex.pm> module itself is just a trivial way to use the Pegex
 framework. It is only intended for the simplest of uses.
 
-This module exports a single function, C<pegex>, which takes a single value, a
-Pegex grammar. The grammar value may be specified as a string, a file name, or
-a file handle. The C<pegex> function returns a L<Pegex::Grammar> object, on
-which you would typically call the C<parse()> method, which (on success) will
-return a data structure of the parsed data.
+This module exports a single function, C<pegex>, which takes a Pegex grammar
+string as input. You may also pass a second parameter which is a hash opject
+of options.
+
+The C<pegex> function returns a L<Pegex::Parser> object, on which you would
+typically call the C<parse()> method, which (on success) will return a data
+structure of the parsed data.
 
 =head1 PEGEX OVERVIEW
 
@@ -83,7 +99,7 @@ how Pegex can take a text grammar defining Foo and generate a parser that can
 parse Foo sources into data (abstract syntax trees).
 
                             Parsing a language called "Foo"
-                               with the Pegex toolset.    
+                               with the Pegex toolset.
 
                               .-----------------------.
   .--------------------.      |    Pegex::Compiler    |
@@ -132,7 +148,8 @@ possible. That's Acmeism.
 
 =head1 SELF COMPILATION TRICKS
 
-You can have some fun using Pegex to compile itself. First get the Pegex grammar repo:
+You can have some fun using Pegex to compile itself. First get the Pegex
+grammar repo:
 
     git clone git://github.com/ingydotnet/pegex-pgx.git
     cd pegex-pgx
@@ -219,7 +236,7 @@ Ingy döt Net <ingy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2010, 2011. Ingy döt Net.
+Copyright (c) 2010, 2011, 2012. Ingy döt Net.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

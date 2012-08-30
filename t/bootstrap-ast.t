@@ -82,7 +82,7 @@ blocks:
 - title: Skip Bracketed
   points:
     grammar: |
-        a: <b> .[ <c> <d> ]
+        a: <b> .( <c> <d> )
         b: /(b)/
         c: /(c+)/
         d: /(d+)/
@@ -161,7 +161,7 @@ blocks:
 - title: Whitespace Matchers
   points:
     grammar: |
-        TOP: /<ws>(<DOT>)~(<DOT>*)~/
+        TOP: /<ws>*(<DOT>)~(<DOT>*)~/
     input: |2+
         .  
            ..    
@@ -173,7 +173,7 @@ blocks:
 - title: Empty Stars
   points:
     grammar: |
-        a: [ <b>* <c> ]+ <b>*
+        a: ( <b>* <c> )+ <b>*
         b: /(b)/
         c: /(c+)/
     input: cc
@@ -233,17 +233,15 @@ blocks:
       - b: b
       - b: b
 
-- title: Before OK Separator
+- title: Tilde matching
   points:
     grammar: |
-        a: <b>+ %%% <c>*
+        a: ~ <b> ~~ <b>+
         b: /(b)/
-        c: /(c)/
-    input: cbcbc
+        c: /<COMMA>/
+    input: b  bb
     ast: |
       a:
-      - c: c
       - b: b
-      - c: c
-      - b: b
-      - c: c
+      - - b: b
+        - b: b
