@@ -1,7 +1,7 @@
 use Test::More;
 use File::Find;
 
-my %skip = map {($_, 1)} qw{Pegex::Regex};
+my %skip = map {($_, 1)} qw{Pegex::Regex Pegex::Mo};
 
 my @modules = ();
 File::Find::find(sub {

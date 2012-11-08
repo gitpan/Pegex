@@ -6,14 +6,14 @@
 # copyright: 2011, 2012
 
 package Pegex::Compiler;
-use Pegex::Mo;
+use Pegex::Base;
 
 use Pegex::Parser;
 use Pegex::Pegex::Grammar;
 use Pegex::Pegex::AST;
 use Pegex::Grammar::Atoms;
 
-has 'tree';
+has tree => ();
 
 sub compile {
     my ($self, $grammar) = @_;
@@ -39,7 +39,7 @@ sub parse {
         receiver => Pegex::Pegex::AST->new,
     );
 
-    $self->tree($parser->parse($input));
+    $self->{tree} = $parser->parse($input);
 
     return $self;
 }
@@ -47,26 +47,26 @@ sub parse {
 #------------------------------------------------------------------------------#
 # Combination
 #------------------------------------------------------------------------------#
-has '_tree';
+has _tree => ();
 
 sub combinate {
     my ($self, $rule) = @_;
-    $rule ||= $self->tree->{'+toprule'}
+    $rule ||= $self->{tree}->{'+toprule'}
         or return $self;
-    $self->_tree({
-        map {($_, $self->tree->{$_})} grep { /^\+/ } keys %{$self->tree}
-    });
+    $self->{_tree} = {
+        map {($_, $self->{tree}->{$_})} grep { /^\+/ } keys %{$self->{tree}}
+    };
     $self->combinate_rule($rule);
-    $self->tree($self->_tree);
+    $self->{tree} = $self->{_tree};
     delete $self->{_tree};
     return $self;
 }
 
 sub combinate_rule {
     my ($self, $rule) = @_;
-    return if exists $self->_tree->{$rule};
+    return if exists $self->{_tree}->{$rule};
 
-    my $object = $self->_tree->{$rule} = $self->tree->{$rule};
+    my $object = $self->{_tree}->{$rule} = $self->{tree}->{$rule};
     $self->combinate_object($object);
 }
 
@@ -80,7 +80,7 @@ sub combinate_object {
     }
     elsif (exists $object->{'.ref'}) {
         my $rule = $object->{'.ref'};
-        if (exists $self->tree->{$rule}) {
+        if (exists $self->{tree}{$rule}) {
             $self->combinate_rule($rule);
         }
     }
@@ -109,10 +109,12 @@ sub combinate_re {
     while (1) {
         $re =~ s[(?<!\\)(~+)]['<ws' . length($1) . '>']ge;
         $re =~ s[<(\w+)>][
-            $self->tree->{$1} and
-            $self->tree->{$1}{'.rgx'}
-                or $atoms->{$1}
-                or die "'$1' not defined in the grammar"
+            $self->{tree}->{$1} and (
+                $self->{tree}->{$1}{'.rgx'} or
+                die "'$1' not defined as a single RE"
+            )
+            or $atoms->{$1}
+            or die "'$1' not defined in the grammar"
         ]e;
         last if $re eq $regexp->{'.rgx'};
         $regexp->{'.rgx'} = $re;
@@ -124,7 +126,7 @@ sub combinate_re {
 #------------------------------------------------------------------------------#
 sub native {
     my ($self) = @_;
-    $self->perl_regexes($self->tree);
+    $self->perl_regexes($self->{tree});
     return $self;
 }
 
@@ -133,6 +135,7 @@ sub perl_regexes {
     if (ref($node) eq 'HASH') {
         if (exists $node->{'.rgx'}) {
             my $re = $node->{'.rgx'};
+#             $node->{'.rgx'} = qr/^$re/;
             $node->{'.rgx'} = qr/\G$re/;
         }
         else {
@@ -170,6 +173,7 @@ sub to_perl {
     $Data::Dumper::Sortkeys = 1;
     my $perl = Data::Dumper::Dumper($self->tree);
     $perl =~ s/\?\^:/?-xism:/g;
+    $perl =~ s!(\.rgx.*?qr/)\(\?-xism:(.*)\)(?=/)!$1$2!g;
     die "to_perl failed with non compatible regex in:\n$perl"
         if $perl =~ /\?\^/;
     return $perl;
@@ -197,6 +201,10 @@ nested data structure.
 The grammar tree can be serialized to YAML, JSON, Perl, or any other
 programming language. This makes it extremely portable. Pegex::Grammar has
 methods for serializing to all these forms.
+
+NOTE: Unless you are developing Pegex based modules, you can safely ignore this
+module. Even if you are you probably won't use it directly. See L<IN PLACE
+COMPILATION> below.
 
 =head1 METHODS
 
@@ -264,11 +272,11 @@ into Perl so that it has no load penalty. Pegex::Grammar provides a special
 mechanism for this. Say you have a class like this:
 
     package MyThing::Grammar;
-    use Pegex::Mo;
+    use Pegex::Base;
     extends 'Pegex::Grammar';
 
-    use constant text => '../mything-grammar-repo/mything.pgx';
-    sub tree {
+    use constant file => '../mything-grammar-repo/mything.pgx';
+    sub make_tree {
     }
 
 Simply use this command:

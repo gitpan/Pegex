@@ -7,21 +7,21 @@
 # copyright: 2009, 2010, 2011, 2012
 # see:
 # - http://www.testml.org/
-# - irc://irc.freenode.net#testml 
+# - irc://irc.freenode.net#testml
 
 use 5.006001;
 use strict;
 use warnings;
 
 my $requires = "
-use Pegex 0.20 ();
+use Pegex 0.21 ();
 ";
 
 package TestML;
 
 use TestML::Runtime;
 
-our $VERSION = '0.26';
+our $VERSION = '0.28';
 
 use constant XXX_skip => 1;
 our $DumpModule = 'YAML::XS';
@@ -80,7 +80,7 @@ sub import {
                 Test::More::plan(
                     skip_all => "$module failed to load"
                 );
-            } 
+            }
         }
         else {
             die "Unknown option '$option'";

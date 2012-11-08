@@ -4,9 +4,15 @@
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
 # copyright: 2010, 2011, 2012
+# see:
+# - Pegex::Compiler
 
+# NOTE:
+# This algorithm should be rewritten as a proper token -> infix ->
+# shunting-yard -> RPN -> evaluate to AST... parser.
+# It should treat % as a proper infix operator with right precedence.
 package Pegex::Bootstrap;
-use Pegex::Mo;
+use Pegex::Base;
 extends 'Pegex::Compiler';
 
 use Pegex::Grammar::Atoms;
@@ -14,6 +20,13 @@ use Pegex::Grammar::Atoms;
 my $modifier = qr{[\!\=\-\+\.]};
 my $group_modifier = qr{[\.]};
 my $quantifier = qr{(?:[\?\*\+]|\d+(?:\+|\-\d+)?)};
+my %prefixes = (
+    '!' => ['+asr', -1],
+    '=' => ['+asr', 1],
+    '.' => '-skip',
+    '-' => '-pass',
+    '+' => '-wrap',
+);
 
 sub parse {
     my ($self, $grammar_text) = @_;
@@ -27,13 +40,13 @@ sub parse {
         $grammar_text = do {local $/; <IN>};
         close IN;
     }
-    $self->tree({});
+    $self->{tree} = {};
 
     # Remove comment lines
     $grammar_text =~ s/^#.*\n+//gm;
 
     # Remove trailing comments
-    $grammar_text =~ s/\ *#.*//g;
+    $grammar_text =~ s/\ +#.*//g;
 
     # Remove blank lines
     $grammar_text =~ s/^\s*\n//gm;
@@ -76,22 +89,22 @@ sub parse {
         my $key = $1;
         $value =~ s/\s+/ /g;
         $value =~ s/^\s*(.*?)\s*$/$1/;
-        $self->tree->{$key} = $value;
-        $self->tree->{'+toprule'} ||= $key;
-        $self->tree->{'+toprule'} = $key if $key eq 'TOP';
+        $self->{tree}->{$key} = $value;
+        $self->{tree}->{'+toprule'} ||= $key;
+        $self->{tree}->{'+toprule'} = $key if $key eq 'TOP';
     }
 
-    for my $rule (sort keys %{$self->tree}) {
+    for my $rule (sort keys %{$self->{tree}}) {
         next if $rule =~ /^\+/;
-        my $text = $self->tree->{$rule};
+        my $text = $self->{tree}->{$rule};
         my @tokens = grep $_,
         ($text =~ m{(
+            `[^`\n]*` |
             /[^/\n]*/ |
             ~+ |
             %%? |
             $modifier?<\w+>$quantifier? |
             $modifier?\w+$quantifier? |
-            `[^`\n]*` |
             \| |
             $group_modifier?\( |
             \)$quantifier? |
@@ -101,7 +114,7 @@ sub parse {
         unshift @tokens, '(';
         push @tokens, ')';
         my $tree = $self->make_tree(\@tokens);
-        $self->tree->{$rule} = $self->compile_next($tree);
+        $self->{tree}->{$rule} = $self->compile_next($tree);
     }
     return $self;
 }
@@ -133,6 +146,25 @@ sub wilt {
             ? [$branch->[$i], pop(@$wilted), $branch->[++$i]]
             : $branch->[$i];
     }
+    if (grep {$_ eq '|'} @$wilted) {
+        my @group;
+        my @grouped = shift @$wilted;   # '('
+        for (@$wilted) {
+            if (/^(?:\||\)$quantifier?)$/) {
+                push @grouped, (
+                    (@group == 1
+                        ? $group[0]
+                        : ['(', @group, ')']
+                    ), $_
+                );
+                @group = ();
+            }
+            else {
+                push @group, $_;
+            }
+        }
+        $wilted = \@grouped;
+    }
     return $wilted;
 }
 
@@ -146,39 +178,17 @@ sub compile_next {
             : $self->compile_group($node, 'all')
     :
         $node =~ /^~+$/ ? $self->compile_ws($node) :
+        $node =~ m!^`! ? $self->compile_error($node) :
         $node =~ m!/! ? $self->compile_re($node) :
         $node =~ m!<! ? $self->compile_rule($node) :
         $node =~ m!^$modifier?\w+$quantifier?$!
             ? $self->compile_rule($node) :
-        $node =~ m!`! ? $self->compile_error($node) :
-            XXX $node;
+            die $node;
 
     while (defined $unit->{'.all'} and @{$unit->{'.all'}} == 1) {
         $unit = $unit->{'.all'}->[0];
     }
     return $unit;
-}
-
-my %prefixes = (
-    '!' => ['+asr', -1],
-    '=' => ['+asr', 1],
-    '.' => '-skip',
-    '-' => '-pass',
-    '+' => '-wrap',
-);
-
-sub compile_ws {
-    my ($self, $node) = @_;
-    my $regex = '<ws' . length($node) . '>';
-    return { '.rgx' => $regex };
-}
-
-sub compile_sep {
-    my ($self, $node) = @_;
-    my $object = $self->compile_next($node->[1]);
-    $object->{'.sep'} = $self->compile_next($node->[2]);
-    $object->{'.sep'}{'+eok'} = 1 if $node->[0] eq '%%';
-    return $object;
 }
 
 sub compile_group {
@@ -206,31 +216,6 @@ sub compile_group {
         ];
     }
     return $object;
-}
-
-sub set_quantity {
-    my ($self, $object, $quantifier) = @_;
-    if ($quantifier eq '*') {
-        $object->{'+min'} = 0;
-    }
-    elsif ($quantifier eq '+') {
-        $object->{'+min'} = 1;
-    }
-    elsif ($quantifier eq '?') {
-        $object->{'+max'} = 1;
-    }
-    elsif ($quantifier =~ /^(\d+)\+$/) {
-        $object->{'+min'} = $1;
-    }
-    elsif ($quantifier =~ /^(\d+)\-(\d+)+$/) {
-        $object->{'+min'} = $1;
-        $object->{'+max'} = $2;
-    }
-    elsif ($quantifier =~ /^(\d+)$/) {
-        $object->{'+min'} = $1;
-        $object->{'+max'} = $1;
-    }
-    else { die "Invalid quantifier: '$quantifier'" }
 }
 
 sub compile_re {
@@ -270,4 +255,60 @@ sub compile_error {
     return $object;
 }
 
+sub compile_sep {
+    my ($self, $node) = @_;
+    my $object = $self->compile_next($node->[1]);
+    $object->{'.sep'} = $self->compile_next($node->[2]);
+    $object->{'.sep'}{'+eok'} = 1 if $node->[0] eq '%%';
+    return $object;
+}
+
+sub compile_ws {
+    my ($self, $node) = @_;
+    my $regex = '<ws' . length($node) . '>';
+    return { '.rgx' => $regex };
+}
+
+sub set_quantity {
+    my ($self, $object, $quantifier) = @_;
+    if ($quantifier eq '*') {
+        $object->{'+min'} = 0;
+    }
+    elsif ($quantifier eq '+') {
+        $object->{'+min'} = 1;
+    }
+    elsif ($quantifier eq '?') {
+        $object->{'+max'} = 1;
+    }
+    elsif ($quantifier =~ /^(\d+)\+$/) {
+        $object->{'+min'} = $1;
+    }
+    elsif ($quantifier =~ /^(\d+)\-(\d+)+$/) {
+        $object->{'+min'} = $1;
+        $object->{'+max'} = $2;
+    }
+    elsif ($quantifier =~ /^(\d+)$/) {
+        $object->{'+min'} = $1;
+        $object->{'+max'} = $1;
+    }
+    else { die "Invalid quantifier: '$quantifier'" }
+}
+
 1;
+
+=head1 SYNOPSIS
+
+    use Pegex::Bootstrap;
+    my $grammar_text = '... grammar text ...';
+    my $pegex_compiler = Pegex::Bootstrap->new();
+    my $grammar_tree = $pegex_compiler->compile($grammar_text)->tree;
+
+=head1 DESCRIPTION
+
+The Pegex language is defined in Pegex. In order to do that, it was necessary
+to make a bootstrap compiler that did the same thing. This way we could slowly
+build up the grammar, and make sure that the 2 compilers do the same thing.
+Parsing the Pegex language itself is not terribly hard, so this module just
+does it by hand.
+
+Unless you are working on Pegex itself, you can ignore this module.

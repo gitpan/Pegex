@@ -4,6 +4,16 @@
 
 Pegex::Grammar::Pegex - Pegex Grammar for the Pegex Grammar Language
 
+=head1 SYNOPSIS
+
+    use Pegex::Pegex::Grammar;
+
+=head1 DESCRIPTION
+
+This is the precompiled grammar class for parsing Pegex itself.
+
+It is not normally used idirectly by end users.
+
 =head1 AUTHOR
 
 Ingy döt Net <ingy@cpan.org>

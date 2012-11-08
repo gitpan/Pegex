@@ -17,9 +17,12 @@ module_name: Pegex
 name: Pegex
 no_index:
   directory:
+    - examples
     - inc
     - t
     - xt
+recommends:
+  YAML::XS: 0
 requires:
   perl: 5.10.0
 resources:
@@ -29,4 +32,4 @@ resources:
     type: git
     url: git://github.com/ingydotnet/pegex-pm.git
     web: https://github.com/ingydotnet/pegex-pm/tree
-version: 0.20
+version: 0.21

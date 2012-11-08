@@ -7,7 +7,7 @@ use Test::More;
 BEGIN {
     eval "require YAML::XS; 1"
         or plan skip_all => 'Requires YAML::XS';
-    if ($ENV{PERL_TEST_DIFFERENCES}) {
+    if ($ENV{PERL_PEGEX_TEST_DIFFERENCES}) {
         require Test::Differences;
         no warnings;
         *is = \&Test::Differences::eq_or_diff;
@@ -40,8 +40,8 @@ sub run {
 }
 
 package t::TestPegex::AST;
-use Pegex::Mo;
-extends 'Pegex::Receiver';
+use Pegex::Base;
+extends 'Pegex::Tree';
 
 sub got_zero { return 0 };
 sub got_empty { return '' };

@@ -1,7 +1,7 @@
 #line 1
 package TestML::AST;
-use Pegex::Mo;
-extends 'Pegex::Receiver';
+use TestML::Mo;
+extends 'Pegex::Tree';
 
 use TestML::Runtime;
 
@@ -41,7 +41,7 @@ sub got_code_statement {
     my ($expression, $assertion);
     my $points = $self->points;
     $self->points([]);
-    
+
     for (@$list) {
         if (ref eq 'TestML::Expression') {
             $expression = $_;

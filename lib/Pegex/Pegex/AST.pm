@@ -6,13 +6,13 @@
 # copyright: 2011, 2012
 
 package Pegex::Pegex::AST;
-use Pegex::Mo;
-extends 'Pegex::Receiver';
+use Pegex::Base;
+extends 'Pegex::Tree';
 
 use Pegex::Grammar::Atoms;
 
-has 'toprule';
-has 'extra_rules' => default => sub {+{}};
+has toprule => ();
+has extra_rules => {};
 
 my %prefixes = (
     '!' => ['+asr', -1],
@@ -27,16 +27,14 @@ my %prefixes = (
 #     my ($self, $match) = @_;
 #     XXX $match;
 # }
-# 
 # __END__
-
 
 sub got_grammar {
     my ($self, $rules) = @_;
     my ($meta_section, $rule_section) = @$rules;
     my $grammar = {
-        '+toprule' => $self->toprule,
-        %{$self->extra_rules},
+        '+toprule' => $self->{toprule},
+        %{$self->{extra_rules}},
         %$meta_section,
     };
     for (@$rule_section) {
@@ -140,7 +138,7 @@ sub got_rule_reference {
     my $ref = $ref1 || $ref2;
     my $node = +{ '.ref' => $ref };
     if (my $regex = Pegex::Grammar::Atoms->atoms->{$ref}) {
-        $self->extra_rules->{$ref} = +{ '.rgx' => $regex };
+        $self->{extra_rules}{$ref} = +{ '.rgx' => $regex };
     }
     if ($suffix) {
         $self->set_quantity($node, $suffix);
