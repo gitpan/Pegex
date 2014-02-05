@@ -1,0 +1,52 @@
+{
+   "abstract" : "Acmeist PEG Parsing Framework ",
+   "author" : [
+      "Ingy d\u00f6t Net <ingy@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 5.006, CPAN::Meta::Converter version 2.132830",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Pegex",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.30"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Test::Pod" : "1.41"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "perl" : "5.01"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "YAML::XS" : "0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/ingydotnet/pegex-pm/issues"
+      },
+      "homepage" : "https://github.com/ingydotnet/pegex-pm",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/ingydotnet/pegex-pm.git",
+         "web" : "https://github.com/ingydotnet/pegex-pm"
+      }
+   },
+   "version" : "0.22"
+}
+

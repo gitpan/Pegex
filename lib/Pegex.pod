@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Pegex - Acmeist PEG Parsing Framework
+Pegex - Acmeist PEG Parser Framework
 
 =head1 SYNOPSIS
 
@@ -125,7 +125,7 @@ Ingy döt Net <ingy@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2010, 2011, 2012. Ingy döt Net.
+Copyright (c) 2010, 2011, 2012, 2013. Ingy döt Net.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

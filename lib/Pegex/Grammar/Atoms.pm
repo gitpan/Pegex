@@ -1,11 +1,7 @@
-##
-# name:      Pegex::Grammar::Atoms
-# abstract:  Pegex Regex Atoms
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2011, 2012
-
 package Pegex::Grammar::Atoms;
+{
+  $Pegex::Grammar::Atoms::VERSION = '0.22';
+}
 use Pegex::Base;
 
 #------------------------------------------------------------------------------#
@@ -16,6 +12,10 @@ my $atoms = {
     ws      => '<WS>',
     ws1     => '<ws>*',
     ws2     => '<ws>+',
+
+    # Default whitespace rules for that use '-' and '+'
+    _       => '\s*',
+    __      => '\s+',
 
     # Special rules
     ALWAYS  => '',
@@ -105,21 +105,3 @@ my $atoms = {
 sub atoms { return $atoms }
 
 1;
-
-=head1 SYNOPSIS
-
-    use Pegex::Grammar::Atoms;
-
-=head1 DESCRIPTION
-
-Atoms are special Pegex rules that represent the small pieces of text that you
-can use to build up regular expressions. Usually they are one or two
-characters.
-
-It may seem like a waste of time to specify C<< <COLON> >> in a regex, instead
-of a simple C<:>. There are three reasons this is encouraged. First is that
-you are defining a grammar for a new language, and it is worth the time to be
-clear and verbose. Second, using an abstraction like this can help with
-portabiliity to languages with different regex engines. Finally, it makes the
-grammar for Pegex so much simpler, because a C</> is always a part of the
-Pegex syntax, and a C<< <SLASH> >> is part of your grammar.

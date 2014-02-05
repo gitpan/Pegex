@@ -1,11 +1,7 @@
-##
-# name:      Pegex::Module
-# abstract:  Base Class for Pegex Grammar Interface Modules
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2011, 2012
-
 package Pegex::Module;
+{
+  $Pegex::Module::VERSION = '0.22';
+}
 use Pegex::Base;
 
 has parser_class => 'Pegex::Parser';
@@ -28,20 +24,3 @@ sub parse {
 }
 
 1;
-
-=head1 SYNOPSIS
-
-    package MyLanguage;
-    use Pegex::Base;
-    extends 'Pegex::Module';
-
-    has grammar => 'MyLanguage::Grammar';
-    has receiver => 'MyLanguage::AST';
-
-    1;
-
-=head1 DESCRIPTION
-
-The module in the SYNOPSIS above is a complete language parsing module. It just
-inherits from L<Pegex::Module>, and then overrides the C<grammar> and
-C<receiver> properties. L<Pegex::Module> provides the C<parse()> method.

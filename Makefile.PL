@@ -1,11 +1,50 @@
-BEGIN { $main::PM = 'lib/Pegex.pm' }
-use inc::Module::Package 'Ingy:modern 0.20';
 
-if (is_admin) {
-    print "Module author removing inc/Pegex/\n";
-    system("rm -fr inc/Pegex");
+use strict;
+use warnings;
+
+use 5.010;
+
+use ExtUtils::MakeMaker 6.30;
+
+
+
+my %WriteMakefileArgs = (
+  "ABSTRACT" => "Acmeist PEG Parsing Framework ",
+  "AUTHOR" => "Ingy d\x{f6}t Net <ingy\@cpan.org>",
+  "BUILD_REQUIRES" => {},
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
+  },
+  "DISTNAME" => "Pegex",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "Pegex",
+  "PREREQ_PM" => {},
+  "TEST_REQUIRES" => {
+    "YAML::XS" => 0
+  },
+  "VERSION" => "0.22",
+  "test" => {
+    "TESTS" => "t/*.t"
+  }
+);
+
+
+my %FallbackPrereqs = (
+  "YAML::XS" => 0
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  delete $WriteMakefileArgs{TEST_REQUIRES};
+  delete $WriteMakefileArgs{BUILD_REQUIRES};
+  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
 }
 
-recommends 'YAML::XS';
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
-clean_files 'nytprof*';
+WriteMakefile(%WriteMakefileArgs);
+
+
+

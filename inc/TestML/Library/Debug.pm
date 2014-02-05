@@ -1,6 +1,8 @@
-#line 1
 package TestML::Library::Debug;
-use TestML();
+use TestML::Base;
+extends 'TestML::Library';
+
+no warnings 'redefine';
 
 sub WWW {
     require XXX;

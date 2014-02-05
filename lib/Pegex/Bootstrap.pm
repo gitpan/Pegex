@@ -1,17 +1,11 @@
-##
-# name:      Pegex::Bootstrap
-# abstract:  Bootstrapping Compiler for a Pegex Grammar
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2010, 2011, 2012
-# see:
-# - Pegex::Compiler
-
 # NOTE:
 # This algorithm should be rewritten as a proper token -> infix ->
 # shunting-yard -> RPN -> evaluate to AST... parser.
 # It should treat % as a proper infix operator with right precedence.
 package Pegex::Bootstrap;
+{
+  $Pegex::Bootstrap::VERSION = '0.22';
+}
 use Pegex::Base;
 extends 'Pegex::Compiler';
 
@@ -84,9 +78,9 @@ sub parse {
         }
     }
 
-    for my $rule (split /(?=^\w+:\s*)/m, $grammar_text) {
-        (my $value = $rule) =~ s/^(\w+):// or die "$rule";
-        my $key = $1;
+    for my $rule (split /(?=^[\w\-]+:\s*)/m, $grammar_text) {
+        (my $value = $rule) =~ s/^([\w-]+):// or die "$rule";
+        (my $key = $1) =~ s/-/_/g;
         $value =~ s/\s+/ /g;
         $value =~ s/^\s*(.*?)\s*$/$1/;
         $self->{tree}->{$key} = $value;
@@ -97,14 +91,20 @@ sub parse {
     for my $rule (sort keys %{$self->{tree}}) {
         next if $rule =~ /^\+/;
         my $text = $self->{tree}->{$rule};
-        my @tokens = grep $_,
+        my @tokens = map {
+            s/-(?!\d)/_/g if /^\-+$/ or not /^[\`\/\-]/;
+            s/(?<![\w\>])\++/__/g if /^\++$/ or not /^[\)\`\/\+]/;
+            $_;
+        } grep $_,
         ($text =~ m{(
             `[^`\n]*` |
             /[^/\n]*/ |
             ~+ |
+            \-+(?=\s|$) |
+            \++(?=\s|$) |
             %%? |
-            $modifier?<\w+>$quantifier? |
-            $modifier?\w+$quantifier? |
+            $modifier?<[\w\-]+>$quantifier? |
+            $modifier?[\w\-]+$quantifier? |
             \| |
             $group_modifier?\( |
             \)$quantifier? |
@@ -149,6 +149,7 @@ sub wilt {
     if (grep {$_ eq '|'} @$wilted) {
         my @group;
         my @grouped = shift @$wilted;   # '('
+        shift @$wilted if $wilted->[0] eq '|';
         for (@$wilted) {
             if (/^(?:\||\)$quantifier?)$/) {
                 push @grouped, (
@@ -181,7 +182,7 @@ sub compile_next {
         $node =~ m!^`! ? $self->compile_error($node) :
         $node =~ m!/! ? $self->compile_re($node) :
         $node =~ m!<! ? $self->compile_rule($node) :
-        $node =~ m!^$modifier?\w+$quantifier?$!
+        $node =~ m!^$modifier?[\w\-]+$quantifier?$!
             ? $self->compile_rule($node) :
             die $node;
 
@@ -222,6 +223,8 @@ sub compile_re {
     my ($self, $node) = @_;
     my $object = {};
     $node =~ s!^/(.*)/$!$1! or die $node;
+    $node =~ s/(?:^|\s)(\-+)(?:\s|$)/'<' . '_' x length($1) . '>'/ge;
+    $node =~ s/(?:^|\s)(\++)(?:\s|$)/'<' . '__' x length($1) . '>'/ge;
     $node =~ s!\s+!!g;
     $node =~ s!\((\:|\=|\!)!(?$1!g;
     $object->{'.rgx'} = $node;
@@ -295,20 +298,3 @@ sub set_quantity {
 }
 
 1;
-
-=head1 SYNOPSIS
-
-    use Pegex::Bootstrap;
-    my $grammar_text = '... grammar text ...';
-    my $pegex_compiler = Pegex::Bootstrap->new();
-    my $grammar_tree = $pegex_compiler->compile($grammar_text)->tree;
-
-=head1 DESCRIPTION
-
-The Pegex language is defined in Pegex. In order to do that, it was necessary
-to make a bootstrap compiler that did the same thing. This way we could slowly
-build up the grammar, and make sure that the 2 compilers do the same thing.
-Parsing the Pegex language itself is not terribly hard, so this module just
-does it by hand.
-
-Unless you are working on Pegex itself, you can ignore this module.

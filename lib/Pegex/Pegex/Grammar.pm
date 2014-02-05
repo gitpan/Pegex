@@ -1,11 +1,7 @@
-##
-# name:      Pegex::Grammar::Pegex
-# abstract:  Pegex Grammar for the Pegex Grammar Language
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2010, 2011, 2012
-
 package Pegex::Pegex::Grammar;
+{
+  $Pegex::Pegex::Grammar::VERSION = '0.22';
+}
 use Pegex::Base;
 extends 'Pegex::Grammar';
 
@@ -14,16 +10,22 @@ extends 'Pegex::Grammar';
 
 use constant file => '../pegex-pgx/pegex.pgx';
 
+# sub make_tree {
+#     use Pegex::Bootstrap;
+#     Pegex::Bootstrap->new->compile(file)->tree;
+# }
+
 sub make_tree {
   {
     '+grammar' => 'pegex',
+    '+include' => 'pegex-atoms',
     '+toprule' => 'grammar',
     '+version' => '0.2.0',
     'ERROR_all_group' => {
       '+min' => 1,
       '.ref' => 'ERROR_rule_part',
       '.sep' => {
-        '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))*/
+        '.ref' => '_'
       }
     },
     'ERROR_any_group' => {
@@ -62,7 +64,7 @@ sub make_tree {
                       '.ref' => 'doc_ending'
                     },
                     {
-                      '.err' => 'Runaway rule group; no ending parens at EOF'
+                      '.err' => 'Runaway rule group. No ending parens at EOF'
                     }
                   ]
                 },
@@ -100,7 +102,7 @@ sub make_tree {
               '.rgx' => qr/\G(?=`[^`]*(?:\s|\#.*(?:\n|\z))*\z)/
             },
             {
-              '.err' => 'Runaway error message; no ending grave at EOF'
+              '.err' => 'Runaway error message. No ending grave at EOF'
             }
           ]
         }
@@ -122,7 +124,7 @@ sub make_tree {
           '.rgx' => qr/\G(?=\/([^\/]*)(?:\s|\#.*(?:\n|\z))*\z)/
         },
         {
-          '.err' => 'Runaway regular expression; no ending slash at EOF'
+          '.err' => 'Runaway regular expression. No ending slash at EOF'
         }
       ]
     },
@@ -188,7 +190,7 @@ sub make_tree {
         {
           '.all' => [
             {
-              '.rgx' => qr/\G(?=[!=\+\-\.]?<[a-zA-Z]\w*\b(?!>))/
+              '.rgx' => qr/\G(?=[!=\+\-\.]?<(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])(?!>))/
             },
             {
               '.err' => 'Missing > in rule reference'
@@ -198,7 +200,7 @@ sub make_tree {
         {
           '.all' => [
             {
-              '.rgx' => qr/\G(?=[!=\+\-\.]?[a-zA-Z]\w*\b>)/
+              '.rgx' => qr/\G(?=[!=\+\-\.]?(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])>)/
             },
             {
               '.err' => 'Missing < in rule reference'
@@ -208,7 +210,7 @@ sub make_tree {
         {
           '.all' => [
             {
-              '.rgx' => qr/\G(?=[!=\+\-\.]?(?:[a-zA-Z]\w*\b|<[a-zA-Z]\w*\b>)[^\w\(\)<\/\~\|`\s\*\+\?!=\+\-\.:;])/
+              '.rgx' => qr/\G(?=[!=\+\-\.]?(?:(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])|<(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])>)[^\w\(\)<\/\~\|`\s\*\+\?!=\+\-\.:;])/
             },
             {
               '.err' => 'Illegal character in rule quantifier'
@@ -218,10 +220,10 @@ sub make_tree {
         {
           '.all' => [
             {
-              '.rgx' => qr/\G(?=[!=\+\-\.]?[a-zA-Z]\w*\b\-)/
+              '.rgx' => qr/\G(?=[!=\+\-\.]?(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])\-)/
             },
             {
-              '.err' => 'Unprotected rule name with numeric quantifier; please use <rule>#-# syntax!'
+              '.err' => 'Unprotected rule name with numeric quantifier. Please use <rule>#-# syntax!'
             }
           ]
         },
@@ -232,7 +234,7 @@ sub make_tree {
               '.ref' => 'rule_modifier'
             },
             {
-              '.rgx' => qr/\G(?=[^\w\(\)<\/\~\|`\s](?:[a-zA-Z]\w*\b|<[a-zA-Z]\w*\b>)(?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?(?![\ \t]*:))/
+              '.rgx' => qr/\G(?=[^\w\(\)<\/\~\|`\s](?:(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])|<(?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-])>)(?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?(?![\ \t]*:))/
             },
             {
               '.err' => 'Illegal rule modifier (must be [=!.-+]?)'
@@ -244,12 +246,18 @@ sub make_tree {
     'ERROR_rule_start' => {
       '.any' => [
         {
-          '.rgx' => qr/\G([a-zA-Z]\w*\b)[\ \t]*:(?:\s|\#.*(?:\n|\z))*/
+          '.rgx' => qr/\G((?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-]))[\ \t]*:(?:\s|\#.*(?:\n|\z))*/
         },
         {
           '.err' => 'Rule header syntax error'
         }
       ]
+    },
+    '_' => {
+      '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))*/
+    },
+    '__' => {
+      '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))+/
     },
     'all_group' => {
       '.all' => [
@@ -260,7 +268,7 @@ sub make_tree {
           '+min' => 0,
           '.all' => [
             {
-              '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))*/
+              '.ref' => '_'
             },
             {
               '.ref' => 'rule_part'
@@ -271,6 +279,9 @@ sub make_tree {
     },
     'any_group' => {
       '.all' => [
+        {
+          '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))*\|?(?:\s|\#.*(?:\n|\z))*/
+        },
         {
           '.ref' => 'all_group'
         },
@@ -339,7 +350,7 @@ sub make_tree {
           '.ref' => 'meta_definition'
         },
         {
-          '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))+/
+          '.ref' => '__'
         },
         {
           '.ref' => 'ERROR_meta_definition'
@@ -368,6 +379,9 @@ sub make_tree {
     'rule_item' => {
       '.any' => [
         {
+          '.ref' => 'whitespace_token'
+        },
+        {
           '.ref' => 'rule_reference'
         },
         {
@@ -375,9 +389,6 @@ sub make_tree {
         },
         {
           '.ref' => 'bracketed_group'
-        },
-        {
-          '.ref' => 'whitespace_token'
         },
         {
           '.ref' => 'error_message'
@@ -396,7 +407,7 @@ sub make_tree {
       }
     },
     'rule_reference' => {
-      '.rgx' => qr/\G([!=\+\-\.]?)(?:([a-zA-Z]\w*\b)|(?:<([a-zA-Z]\w*\b)>))((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?)(?![\ \t]*:)/
+      '.rgx' => qr/\G([!=\+\-\.]?)(?:((?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-]))|(?:<((?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-]))>))((?:[\*\+\?]|[0-9]+(?:\-[0-9]+|\+)?)?)(?![\ \t]*:)/
     },
     'rule_section' => {
       '+min' => 0,
@@ -405,27 +416,17 @@ sub make_tree {
           '.ref' => 'rule_definition'
         },
         {
-          '.rgx' => qr/\G(?:\s|\#.*(?:\n|\z))+/
+          '.ref' => '__'
         }
       ]
     },
     'rule_start' => {
-      '.rgx' => qr/\G([a-zA-Z]\w*\b)[\ \t]*:(?:\s|\#.*(?:\n|\z))*/
+      '.rgx' => qr/\G((?:[a-zA-Z][a-zA-Z0-9]*(?:[\-_][a-zA-Z0-9]+)*|\-+|_+)(?=[^\w\-]))[\ \t]*:(?:\s|\#.*(?:\n|\z))*/
     },
     'whitespace_token' => {
-      '.rgx' => qr/\G(\~+)/
+      '.rgx' => qr/\G(\~+|(?:\++|\-+)(?=\s+|\z))/
     }
   }
 }
 
 1;
-
-=head1 SYNOPSIS
-
-    use Pegex::Pegex::Grammar;
-
-=head1 DESCRIPTION
-
-This is the precompiled grammar class for parsing Pegex itself.
-
-It is not normally used idirectly by end users.

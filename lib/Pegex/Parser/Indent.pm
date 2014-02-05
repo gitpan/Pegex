@@ -1,4 +1,7 @@
 package Pegex::Parser::Indent;
+{
+  $Pegex::Parser::Indent::VERSION = '0.22';
+}
 
 # The indentation levels of consecutive lines are used to generate INDENT and
 # DEDENT tokens, using a stack, as follows. Before the first line of the file

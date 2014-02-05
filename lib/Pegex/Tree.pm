@@ -1,11 +1,7 @@
-##
-# name:      Pegex::Tree
-# abstract:  Pegex Parse Tree Receiver
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2012
-
 package Pegex::Tree;
+{
+  $Pegex::Tree::VERSION = '0.22';
+}
 use Pegex::Base;
 extends 'Pegex::Receiver';
 
@@ -24,16 +20,3 @@ sub final {
 }
 
 1;
-
-=head1 SYNOPSIS
-
-    use Pegex;
-    $tree = pegex($grammar, receiver => 'Pegex::Tree')->parse($input);
-
-=head1 DESCRIPTION
-
-L<Pegex::Tree> is receiver class that will shape the captured data from a Pegex
-parse operation into a tree made out of arrays.
-
-This module is a very (probably the most) common base class for writing your
-own receiver class.
