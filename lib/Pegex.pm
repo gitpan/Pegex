@@ -2,7 +2,7 @@ use v5.10.0; use strict; use warnings;
 
 package Pegex;
 {
-  $Pegex::VERSION = '0.22';
+  $Pegex::VERSION = '0.23';
 }
 
 use Pegex::Parser;

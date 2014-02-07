@@ -1,7 +1,8 @@
 package Pegex::Tree::Wrap;
 {
-  $Pegex::Tree::Wrap::VERSION = '0.22';
+  $Pegex::Tree::Wrap::VERSION = '0.23';
 }
+
 use Pegex::Base;
 extends 'Pegex::Receiver';
 

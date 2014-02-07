@@ -1,6 +1,6 @@
 package Pegex::Regex;
 {
-  $Pegex::Regex::VERSION = '0.22';
+  $Pegex::Regex::VERSION = '0.23';
 }
 
 use Pegex::Parser;

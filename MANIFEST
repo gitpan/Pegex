@@ -14,6 +14,7 @@ examples/lib/Precedence.pm
 examples/lib/RPN.pm
 examples/tokenizer.pl
 inc/Pegex/Base.pm
+inc/Pegex/Compiler.pm
 inc/Pegex/Grammar.pm
 inc/Pegex/Input.pm
 inc/Pegex/Parser.pm
@@ -58,6 +59,7 @@ lib/Pegex/Pegex/AST.pm
 lib/Pegex/Pegex/Grammar.pm
 lib/Pegex/Pegex/Grammar.pod
 lib/Pegex/Receiver.pm
+lib/Pegex/Receiver.pod
 lib/Pegex/Regex.pm
 lib/Pegex/Regex.pod
 lib/Pegex/Resources.pod

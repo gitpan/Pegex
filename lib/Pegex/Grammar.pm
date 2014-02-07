@@ -1,7 +1,8 @@
 package Pegex::Grammar;
 {
-  $Pegex::Grammar::VERSION = '0.22';
+  $Pegex::Grammar::VERSION = '0.23';
 }
+
 use Pegex::Base;
 
 # Grammar can be in text or tree form. Tree will be compiled from text.

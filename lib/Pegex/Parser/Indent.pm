@@ -1,6 +1,6 @@
 package Pegex::Parser::Indent;
 {
-  $Pegex::Parser::Indent::VERSION = '0.22';
+  $Pegex::Parser::Indent::VERSION = '0.23';
 }
 
 # The indentation levels of consecutive lines are used to generate INDENT and

@@ -4,8 +4,9 @@
 # It should treat % as a proper infix operator with right precedence.
 package Pegex::Bootstrap;
 {
-  $Pegex::Bootstrap::VERSION = '0.22';
+  $Pegex::Bootstrap::VERSION = '0.23';
 }
+
 use Pegex::Base;
 extends 'Pegex::Compiler';
 

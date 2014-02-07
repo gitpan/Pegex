@@ -1,6 +1,6 @@
 package Pegex::Parser;
 {
-  $Pegex::Parser::VERSION = '0.22';
+  $Pegex::Parser::VERSION = '0.23';
 }
 
 use Pegex::Input;
@@ -10,13 +10,14 @@ use Scalar::Util;
 {
     package Pegex::Constant;
 {
-  $Pegex::Constant::VERSION = '0.22';
+  $Pegex::Constant::VERSION = '0.23';
 }
     our $Null = [];
     our $Dummy = [];
 }
 
 package Pegex::Parser;
+
 use Pegex::Base;
 
 has grammar => (required => 1);

@@ -1,7 +1,4 @@
 package Pegex::Compiler;
-{
-  $Pegex::Compiler::VERSION = '0.23';
-}
 
 use Pegex::Base;
 
