@@ -1,14 +1,10 @@
 use v5.10.0; use strict; use warnings;
 
 package Pegex;
-{
-  $Pegex::VERSION = '0.23';
-}
-
+$Pegex::VERSION = '0.24';
 use Pegex::Parser;
 use Pegex::Grammar;
 
-# VERSION
 # ABSTRACT: Acmeist PEG Parsing Framework 
 
 use Exporter 'import';

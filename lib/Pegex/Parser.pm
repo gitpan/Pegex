@@ -1,18 +1,13 @@
 package Pegex::Parser;
-{
-  $Pegex::Parser::VERSION = '0.23';
-}
-
+$Pegex::Parser::VERSION = '0.24';
 use Pegex::Input;
 
 use Scalar::Util;
 
 {
     package Pegex::Constant;
-{
-  $Pegex::Constant::VERSION = '0.23';
-}
-    our $Null = [];
+$Pegex::Constant::VERSION = '0.24';
+our $Null = [];
     our $Dummy = [];
 }
 

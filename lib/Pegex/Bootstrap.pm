@@ -3,10 +3,7 @@
 # shunting-yard -> RPN -> evaluate to AST... parser.
 # It should treat % as a proper infix operator with right precedence.
 package Pegex::Bootstrap;
-{
-  $Pegex::Bootstrap::VERSION = '0.23';
-}
-
+$Pegex::Bootstrap::VERSION = '0.24';
 use Pegex::Base;
 extends 'Pegex::Compiler';
 
