@@ -3,15 +3,15 @@ abstract: 'Acmeist PEG Parsing Framework '
 author:
   - 'Ingy döt Net <ingy@cpan.org>'
 build_requires:
-  YAML::XS: 0
+  YAML::XS: '0'
 configure_requires:
-  ExtUtils::MakeMaker: 6.30
+  ExtUtils::MakeMaker: '6.30'
 dynamic_config: 0
 generated_by: 'Dist::Zilla version 5.012, CPAN::Meta::Converter version 2.132830'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  version: '1.4'
 name: Pegex
 requires:
   perl: v5.8.1
@@ -19,4 +19,4 @@ resources:
   bugtracker: https://github.com/ingydotnet/pegex-pm/issues
   homepage: https://github.com/ingydotnet/pegex-pm
   repository: https://github.com/ingydotnet/pegex-pm.git
-version: 0.24
+version: '0.25'

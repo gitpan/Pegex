@@ -11,6 +11,7 @@ examples/lib/Precedence.pm
 examples/lib/RPN.pm
 examples/tokenizer.pl
 inc/Pegex/Base.pm
+inc/Pegex/Compiler.pm
 inc/Pegex/Grammar.pm
 inc/Pegex/Input.pm
 inc/Pegex/Parser.pm

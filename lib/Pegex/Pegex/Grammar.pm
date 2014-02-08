@@ -1,5 +1,5 @@
 package Pegex::Pegex::Grammar;
-$Pegex::Pegex::Grammar::VERSION = '0.24';
+$Pegex::Pegex::Grammar::VERSION = '0.25';
 use Pegex::Base;
 extends 'Pegex::Grammar';
 

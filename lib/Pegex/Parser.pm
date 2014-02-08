@@ -1,12 +1,12 @@
 package Pegex::Parser;
-$Pegex::Parser::VERSION = '0.24';
+$Pegex::Parser::VERSION = '0.25';
 use Pegex::Input;
 
 use Scalar::Util;
 
 {
     package Pegex::Constant;
-$Pegex::Constant::VERSION = '0.24';
+$Pegex::Constant::VERSION = '0.25';
 our $Null = [];
     our $Dummy = [];
 }
@@ -49,7 +49,9 @@ sub parse {
 
     die "No 'grammar'. Can't parse" unless $self->{grammar};
 
-    $self->{tree} = $self->{grammar}->{tree} //= $self->{grammar}->make_tree;
+    $self->{grammar}->{tree} = $self->{grammar}->make_tree
+        unless defined $self->{grammar}->{tree};
+    $self->{tree} = $self->{grammar}->{tree};
 
     my $start_rule_ref = $start ||
         $self->{tree}->{'+toprule'} ||
@@ -113,9 +115,12 @@ sub optimize_node {
     }
 
     my ($min, $max) = @{$node}{'+min', '+max'};
-    $node->{'+min'} //= defined($max) ? 0 : 1;
-    $node->{'+max'} //= defined($min) ? 0 : 1;
-    $node->{'+asr'} //= 0;
+    $node->{'+min'} = defined($max) ? 0 : 1
+        unless defined $node->{'+min'};
+    $node->{'+max'} = defined($min) ? 0 : 1
+        unless defined $node->{'+max'};
+    $node->{'+asr'} = 0
+        unless defined $node->{'+asr'};
 
     if ($node->{kind} =~ /^(?:all|any)$/) {
         $self->optimize_node($_) for @{$node->{rule}};

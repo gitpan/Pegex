@@ -1,5 +1,5 @@
 package Pegex::Receiver;
-$Pegex::Receiver::VERSION = '0.24';
+$Pegex::Receiver::VERSION = '0.25';
 use Pegex::Base;
 
 has parser => (); # The parser object.
@@ -7,7 +7,8 @@ has parser => (); # The parser object.
 # Flatten a structure of nested arrays into a single array in place.
 sub flatten {
     my ($self, $array, $times) = @_;
-    $times //= -1;
+    $times = -1
+        unless defined $times;
     while ($times-- and grep {ref($_) eq 'ARRAY'} @$array) {
         @$array = map {
             (ref($_) eq 'ARRAY') ? @$_ : $_

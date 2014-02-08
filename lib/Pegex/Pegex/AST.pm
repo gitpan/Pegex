@@ -1,5 +1,5 @@
 package Pegex::Pegex::AST;
-$Pegex::Pegex::AST::VERSION = '0.24';
+$Pegex::Pegex::AST::VERSION = '0.25';
 use Pegex::Base;
 extends 'Pegex::Tree';
 

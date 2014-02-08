@@ -1,5 +1,5 @@
 package Pegex::Regex;
-$Pegex::Regex::VERSION = '0.24';
+$Pegex::Regex::VERSION = '0.25';
 use Pegex::Parser;
 use Pegex::Grammar;
 use Pegex::Receiver;
