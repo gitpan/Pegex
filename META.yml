@@ -1,7 +1,7 @@
 ---
-abstract: 'Acmeist PEG Parsing Framework '
+abstract: 'Acmeist PEG Parsing Framework'
 author:
-  - 'Ingy döt Net <ingy@cpan.org>'
+  - 'Ingy döt Net <ingy@cpan.net>'
 build_requires:
   YAML::XS: '0'
 configure_requires:
@@ -14,9 +14,9 @@ meta-spec:
   version: '1.4'
 name: Pegex
 requires:
-  perl: v5.8.1
+  perl: v5.8.3
 resources:
   bugtracker: https://github.com/ingydotnet/pegex-pm/issues
   homepage: https://github.com/ingydotnet/pegex-pm
   repository: https://github.com/ingydotnet/pegex-pm.git
-version: '0.25'
+version: '0.30'

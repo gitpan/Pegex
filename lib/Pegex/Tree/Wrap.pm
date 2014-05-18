@@ -1,12 +1,11 @@
 package Pegex::Tree::Wrap;
-$Pegex::Tree::Wrap::VERSION = '0.25';
+$Pegex::Tree::Wrap::VERSION = '0.30';
 use Pegex::Base;
 extends 'Pegex::Receiver';
 
 sub gotrule {
     my $self = shift;
     @_ || return ();
-    return $_[0] if $self->{parser}{parent}{-pass};
     return {$self->{parser}{rule} => $_[0]}
 }
 

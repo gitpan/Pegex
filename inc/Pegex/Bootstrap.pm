@@ -1,5 +1,5 @@
 package Pegex::Bootstrap;
-$Pegex::Bootstrap::VERSION = '0.30';
+
 use Carp qw(carp confess croak);
 
 use Pegex::Base;
@@ -519,7 +519,7 @@ sub lex {
                         }
                         else {
                             push @$stack, $scope;
-                            # Hack to support /+ …/
+                            # Hack to support /+ â¦/
                             if ($scope eq 'regex') {
                                 if (substr($grammar, $pos) =~ /\A\+(?=[\s\/])/) {
                                     $pos += length($&);

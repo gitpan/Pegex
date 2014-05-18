@@ -1,7 +1,8 @@
 %TestML 0.1.0
 
-Plan = 9
+Plan = 46
 
+*grammar1.bootstrap_compile.yaml == *grammar2.bootstrap_compile.yaml
 *grammar1.compile.yaml == *grammar2.compile.yaml
 
 === Simple Test Case
@@ -10,6 +11,15 @@ a: /x/
 --- grammar2
 a:
     /x/
+
+=== Token Per Line
+--- SKIP: TODO
+--- grammar1
+a: /b/
+--- grammar2
+a
+:
+/b/
 
 === And over Or Precedence
 --- grammar1
@@ -70,39 +80,99 @@ a_a: b_b+ c_c
 b-b: c-c_c /d/
 c_c_c: e
 
-=== Token Per Line
---- SKIP: TODO
---- grammar1
-a: /b/
---- grammar2
-a
-:
-/b/
-
 === Whitespace Tokens
 --- grammar1
 a: - b + c -
 b: /- cat + dog -/
 --- grammar2
 a: _ b __ c _
-b: /~ cat ~~ dog ~/
+b: /<_> cat <__> dog <_>/
 
 === Regex Combination
 --- SKIP: TODO
 --- grammar1: a: /b/ /c/
 --- grammar2: a: /bc/
 
-=== Regex Combination by Reference
---- SKIP: TODO
+=== Separator Reduction a % b
 --- grammar1
-a: b /c/
-b: /b/
---- grammar2: a: /bc/
-
-=== Multiple Rules Names per Definition
---- SKIP: TODO
---- grammar1
-a b: /O HAI/
+x: a % b
 --- grammar2
-a: /O HAI/
-b: /O HAI/
+x: a
+
+=== Separator Reduction a %% b
+--- grammar1
+x: a %% b
+--- grammar2
+x: a b?
+
+=== Separator Reduction a? % b
+--- grammar1
+x: a? % b
+--- grammar2
+x: a?
+
+=== Separator Reduction a? %% b
+--- grammar1
+x: a? %% b
+--- grammar2
+x: a? b?
+
+=== Separator Reduction a* % b
+--- grammar1
+x: a* % b
+--- grammar2
+x: (a -(b a)*)?
+
+=== Separator Reduction a* %% b
+--- grammar1
+x: a* %% b
+--- grammar2
+x: (a -(b a)* b?)?
+
+=== Separator Reduction a+ % b
+--- grammar1
+x: a+ % b
+--- grammar2
+x: a -(b a)*
+
+=== Separator Reduction a+ %% b
+--- grammar1
+x: a+ %% b
+--- grammar2
+x: a -(b a)* b?
+
+=== Separator Reduction <a>3 % b
+--- grammar1
+x: <a>3 % b
+--- grammar2
+x: a -(b a)2
+
+=== Separator Reduction <a>3 %% b
+--- grammar1
+x: <a>3 %% b
+--- grammar2
+x: a -(b a)2 b?
+
+=== Separator Reduction <a>3+ % b
+--- grammar1
+x: <a>3+ % b
+--- grammar2
+x: a -(b a)2+
+
+=== Separator Reduction <a>3+ %% b
+--- grammar1
+x: <a>3+ %% b
+--- grammar2
+x: a -(b a)2+ b?
+
+=== Separator Reduction <a>3-7 % b
+--- grammar1
+x: <a>3-7 % b
+--- grammar2
+x: a -(b a)2-6
+
+=== Separator Reduction <a>3-7 %% b
+--- grammar1
+x: <a>3-7 %% b
+--- grammar2
+x: a -(b a)2-6 b?

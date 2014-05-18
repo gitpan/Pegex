@@ -3,15 +3,15 @@
 use strict;
 use warnings;
 
-use 5.008001;
+use 5.008003;
 
 use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Acmeist PEG Parsing Framework ",
-  "AUTHOR" => "Ingy d\x{f6}t Net <ingy\@cpan.org>",
+  "ABSTRACT" => "Acmeist PEG Parsing Framework",
+  "AUTHOR" => "Ingy d\x{f6}t Net <ingy\@cpan.net>",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
@@ -24,7 +24,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "YAML::XS" => 0
   },
-  "VERSION" => "0.25",
+  "VERSION" => "0.30",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -12,10 +12,9 @@ use Pegex::Tree::Wrap;
 use TestAST;
 use YAML::XS;
 
-# use XXX;
 sub compile {
     my ($self, $grammar) = @_;
-    my $tree = Pegex::Compiler->new->parse($grammar->value)->combinate->tree;
+    my $tree = Pegex::Compiler->new->parse($grammar->value)->tree;
     delete $tree->{'+toprule'};
     delete $tree->{'_'};
     delete $tree->{'__'};
@@ -24,7 +23,7 @@ sub compile {
 
 sub bootstrap_compile {
     my ($self, $grammar) = @_;
-    my $tree = Pegex::Bootstrap->new->parse($grammar->value)->combinate->tree;
+    my $tree = Pegex::Bootstrap->new->parse($grammar->value)->tree;
     delete $tree->{'+toprule'};
     delete $tree->{'_'};
     delete $tree->{'__'};
@@ -67,13 +66,20 @@ sub parse_input {
 sub parse_to_tree {
     my ($self, $grammar, $input) = @_;
     require Pegex::Tree;
+$::testing = 0; # XXX
     my $parser = pegex($grammar->value, 'Pegex::Tree');
+$parser->grammar->tree;
+    # use XXX; XXX $parser->grammar->tree;
+$::testing = 1; # XXX
     return native $parser->parse($input->value);
 }
 
 sub parse_to_tree_wrap {
     my ($self, $grammar, $input) = @_;
+$::testing = 0; # XXX
     my $parser = pegex($grammar->value, 'Pegex::Tree::Wrap');
+$parser->grammar->tree;
+$::testing = 1; # XXX
     return native $parser->parse($input->value);
 }
 

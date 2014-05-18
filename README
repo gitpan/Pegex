@@ -48,8 +48,12 @@ SYNOPSIS
         my $result = $parser->receiver->data;
 
 DESCRIPTION
-    Pegex is a Acmeist parser framework. It allows you to easily create
+    Pegex is an Acmeist parser framework. It allows you to easily create
     parsers that will work equivalently in lots of programming languages!
+    The inspiration for Pegex comes from the parsing engine upon which the
+    postmodern programming language Perl 6 is based on. Pegex brings this
+    beauty to the other *just*modern languages that have a normal regular
+    expression engine available.
 
     Pegex gets it name by combining Parsing Expression Grammars (PEG), with
     Regular Expessions (Regex). That's actually what Pegex does.
@@ -63,7 +67,9 @@ DESCRIPTION
 
     Pegex attempts to be the simplest way to define new (or old) Domain
     Specific Languages (DSLs) that need to be used in several programming
-    languages and environments.
+    languages and environments. Things like JSON, YAML, Markdown etc. It
+    also great for writing parsers/compilers that only need to work in one
+    language.
 
 USAGE
     The "Pegex.pm" module itself (this module) is just a trivial way to use
@@ -94,7 +100,7 @@ SEE ALSO
 
     *   <http://github.com/ingydotnet/pegex-pm>
 
-    *   irc.freenode.net#pegex
+    *   <irc://freenode.net#pegex>
 
 AUTHOR
     Ingy döt Net <ingy@cpan.org>
@@ -105,5 +111,5 @@ COPYRIGHT AND LICENSE
     This program is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.
 
-    See http://www.perl.com/perl/misc/Artistic.html
+    See <http://www.perl.com/perl/misc/Artistic.html>
 

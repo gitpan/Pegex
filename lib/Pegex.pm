@@ -1,8 +1,8 @@
-# ABSTRACT: Acmeist PEG Parsing Framework 
+# ABSTRACT: Acmeist PEG Parsing Framework
 use strict; use warnings;
 
 package Pegex;
-$Pegex::VERSION = '0.25';
+$Pegex::VERSION = '0.30';
 use Pegex::Parser;
 use Pegex::Grammar;
 
