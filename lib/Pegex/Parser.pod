@@ -15,12 +15,12 @@ Pegex::Parser - Pegex Parser Runtime
     use Pegex::Parser;
     use SomeGrammarClass;
     use SomeReceiverClass;
-    
+
     my $parser = Pegex::Parser->new(
         grammar => SomeGrammarClass->new,
         receiver => SomeReceiverClass->new,
     );
-    
+
     my $result = $parser->parse($SomeInputText);
 
 =head1 DESCRIPTION

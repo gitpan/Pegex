@@ -162,12 +162,12 @@ The next three rules need no new knowledge. Take a look at these and see if you 
         string
         /- COLON -/
         node
-    
+
     seq:
         /- LSQUARE -/
         node* % /- COMMA -/
         /- RSQUARE -/
-    
+
     scalar:
         string |
         number |
@@ -250,13 +250,13 @@ There are just 5 more simple rules needed to complete the JSON Pegex grammar:
         (: DOT DIGIT* )?
         (: [eE] [ DASH PLUS ]? DIGIT+ )?
     )/
-    
+
     boolean: true | false
-    
+
     true: /true/
-    
+
     false: /false/
-    
+
     null: /null/
 
 Note that the rule for 'number' captures data, but the other rules don't. That's because as long as the receiver is told that a 'null' rule was matched, it can turn it into a Perl C<undef>. It's not important what the actual matching text was (even though in this case it has to be exactly the string 'null').

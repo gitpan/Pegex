@@ -42,7 +42,7 @@ Here are a couple rules from the pegex.pgx grammar. (These are the rules that st
         rule_start
         rule_group
         ending
-    
+
     rule_start: /
         ( rule_name )     # Capture the rule_name
         BLANK*
@@ -138,7 +138,7 @@ The regex syntax mostly follows Perl, with the following exceptions:
 
     # Any rules in angle brackets are referenced in the regex
     / ( <rule1> | 'non_rule' ) /  # "non_rule" is interpreted literally
-    
+
     # The syntax implies a /x modifier, so whitespace and comments are
     # ignored.
     / (
@@ -146,10 +146,10 @@ The regex syntax mostly follows Perl, with the following exceptions:
         |
         rule2
     ) /
-    
+
     # Whitespace is declared with dash and plus.
     / - rule3 + /  # - = \s*, + = \s+, etc.
-    
+
     # Any (?XX ) syntax can have the question mark removed
     / (: a | b ) /  # same as / (?: a | b ) /
 
@@ -222,7 +222,7 @@ This would be a match directly from the RE rule.  As rules go further back, thin
     r: (a b)+ % +
     a: /( ALPHA+ )/
     b: /( DIGIT+ )( PLUS )/
-    
+
     # input = foobar123+
     # output (using Pegex::Tree) = [
     #     'foobar', [ '123', '+' ]
@@ -241,7 +241,7 @@ Any rule can use the skip modifier (DOT) to completely skip the return from that
     r: (a .b)+ % +
     a: /( ALPHA+ )/
     b: /( DIGIT+ )( PLUS )/
-    
+
     # input = foobar123+ boofar789+
     # output (using Pegex::Tree) = [
     #     'foobar',
@@ -253,7 +253,7 @@ The skip modifier can also be used with groups.  (This is the only group modifie
     r: .(a b)+ % +
     a: /( ALPHA+ )/
     b: /( DIGIT+ )( PLUS )/
-    
+
     # output (using Pegex::Tree) = []
 
 =head2 Wrapping
@@ -271,7 +271,7 @@ Note that this behavior can be "hard set" with the C<+/-> rule modifiers:
 This is simply a check in the C<gotrule> for the receiver.  So, any specific C<got_*> receiver methods will override even these settings, and choose to pass the match as-is.  In this case, the C<got_*> sub return value dictates what ultimately gets put into the tree object:
 
     +rule_A   # in this case, the + is useless here
-    
+
     sub got_rule_A {
         my ($self, $matches_arrayref) = @_;
         return $matches_arrayref;
@@ -281,7 +281,7 @@ This is simply a check in the C<gotrule> for the receiver.  So, any specific C<g
 You can "correct" this behavior by passing it back to C<gotrule>:
 
     +rule_A   # now + is honored
-    
+
     sub got_rule_A {
         my ($self, $matches_arrayref) = @_;
         return $self->gotrule($matches_arrayref);

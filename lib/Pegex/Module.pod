@@ -15,10 +15,10 @@ Pegex::Module - Base Class for Pegex Grammar Interface Modules
     package MyLanguage;
     use Pegex::Base;
     extends 'Pegex::Module';
-    
+
     has grammar => 'MyLanguage::Grammar';
     has receiver => 'MyLanguage::AST';
-    
+
     1;
 
 =head1 DESCRIPTION

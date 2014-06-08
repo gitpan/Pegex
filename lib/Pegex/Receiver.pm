@@ -1,5 +1,5 @@
 package Pegex::Receiver;
-$Pegex::Receiver::VERSION = '0.30';
+$Pegex::Receiver::VERSION = '0.31';
 use Pegex::Base;
 
 has parser => (); # The parser object.

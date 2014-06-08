@@ -14,23 +14,23 @@ Pegex::Receiver - Base Class for All Pegex Receivers
 
     package MyReceiver;
     use base 'Pegex::Receiver';
-    
+
     # Handle data for a specific rule
     sub got_somerulename {
         my ($self, $got) = @_;
         # ... process ...
         return $result;
     }
-    
+
     # Handle data for any other rule
     sub gotrule {
         my ($self, $got) = @_;
         return $result;
     }
-    
+
     # Pre-process
     sub initial { ... }
-    
+
     # Post-process
     sub final {
         ...;
@@ -72,11 +72,13 @@ This section documents the methods that you can include in receiver subclass.
 =item C<got_$rulename($got)>
 
 An action method for a specific, named rule.
+
     sub got_rule42 {
         my ($self, $got) = @_;
         ...
         return $result;
     }
+
 The C<$got> value that is passed in is the current value of the parse tree.
 What gets returned is whatever you want to new value to be.
 
@@ -110,8 +112,10 @@ grammar on the fly. (Experts only!)
 
 A utility method that can turn an array of arrays into a single array.
 For example:
+
     $self->flatten([1, [2, [3, 4], 5], 6]);
     # produces [1, 2, 3, 4, 5, 6]
+
 Hashes are left unchanged. The array is modified in place, but is also the
 return value.
 

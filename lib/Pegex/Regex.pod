@@ -18,7 +18,7 @@ Pegex::Regex - Use Pegex Like a Regex
         my $grammar = qr{$grammar_text}x;
         $text =~ $grammar;
         my $result = \%/;
-    
+
         # Turn off Pegex in this scope.
         no Pegex::Regex;
     }

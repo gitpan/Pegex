@@ -1,3 +1,8 @@
+0.31 Sat May 17 23:43:00 PDT 2014
+ - Add doc badges.
+ - Switch to Zilla::Dist
+ - Fix a bug in Pegex::Parser
+
 0.30 Sat May 17 23:43:00 PDT 2014
  - Major release.
  - New cleaner syntax.

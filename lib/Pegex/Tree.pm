@@ -1,5 +1,5 @@
 package Pegex::Tree;
-$Pegex::Tree::VERSION = '0.30';
+$Pegex::Tree::VERSION = '0.31';
 use Pegex::Base;
 extends 'Pegex::Receiver';
 

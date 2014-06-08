@@ -1,5 +1,5 @@
 package Pegex::Grammar::Atoms;
-$Pegex::Grammar::Atoms::VERSION = '0.30';
+$Pegex::Grammar::Atoms::VERSION = '0.31';
 use Pegex::Base;
 
 #------------------------------------------------------------------------------#

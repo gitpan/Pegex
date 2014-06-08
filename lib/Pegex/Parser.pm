@@ -1,5 +1,5 @@
 package Pegex::Parser;
-$Pegex::Parser::VERSION = '0.30';
+$Pegex::Parser::VERSION = '0.31';
 use Pegex::Base;
 use Pegex::Input;
 use Pegex::Optimizer;
@@ -7,7 +7,7 @@ use Scalar::Util;
 
 {
     package Pegex::Constant;
-$Pegex::Constant::VERSION = '0.30';
+$Pegex::Constant::VERSION = '0.31';
 our $Null = [];
     our $Dummy = [];
 }
@@ -41,7 +41,7 @@ sub parse {
     $self->{position} = 0;
     $self->{farthest} = 0;
 
-    if (not UNIVERSAL::isa($input, 'Pegex::Input')) {
+    if (not ref $input or not UNIVERSAL::isa($input, 'Pegex::Input')) {
         $input = Pegex::Input->new(string => $input);
     }
     $self->{input} = $input;

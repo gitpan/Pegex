@@ -12,27 +12,19 @@ The parser, grammar, receiver and even the input, are Pegex objects. These 4 obj
 
 =over
 
-=item [Pegex
-
-Parser]
+=item L<Pegex::Parser>
 
 The Pegex parsing engine. This engine applies the logic of the grammar to an input text. A B<parser> object contains a B<grammar> object and a B<receiver> object. Its primary method is called C<parse>. The default parser engine is non-backtracking, recursive descent. However there are parser subclasses for various alternative types of parsing.
 
-=item [Pegex
-
-Grammar]
+=item L<Pegex::Grammar>
 
 A Pegex grammar starts as a text file/string composed in the B<Pegex> syntax. Before it can be used in by a Parser it must be compiled. After compilation, it is turned into a data tree consisting of rules and regexes. In modules that are based on a Pegex grammar, the grammar will be compiled into a class file.  Pegex itself, uses a Pegex grammar class called L<Pegex::Pegex::Grammar> to parse various Pegex grammars.
 
-=item [Pegex
-
-Receiver]
+=item L<Pegex::Receiver>
 
 A parser on it's own has no idea what to do with the text it matches. A Pegex B<receiver> is a class that contains methods corresponding to the rules in a grammar. As a rule in the grammar matches, its corresponding receiver method (if one exists) is called with the data that has been matched. It is the receiver's job to take action on the data, often building it into some new structure. Pegex will use L<Pegex::Tree::Wrap> as the default receiver; it produces a reasonably readable tree of the matched / captured data.
 
-=item [Pegex
-
-Input]
+=item L<Pegex::Input>
 
 Pegex abstracts its input streams into an object interface as well. Any operation that can take an input string, can also take an input object. Pegex will turn regular strings into these objects. This is probably the API concept you will encounter the least, but it is covered here for completeness.
 
@@ -46,12 +38,12 @@ The L<Pegex> module exports a function called C<pegex> that you can use for smal
 
     use Pegex;
     use YAML;
-    
+
     $grammar = "
     expr: num PLUS num
     num: /( DIGIT+ )/
     ";
-    
+
     print Dump pegex($grammar)->parse('2+2');
 
 This program would produce:
@@ -83,7 +75,7 @@ If we wrote our own receiver class called C<Calculator> like this:
 
     package Calculator;
     use base 'Pegex::Tree';
-    
+
     sub got_expr {
         my ($receiver, $data) = @_;
         my ($a, $b) = @$data;
@@ -106,12 +98,12 @@ Continuing with the example above, let's see how to do it a little more formally
     use Pegex::Grammar;
     use Pegex::Tree;
     use Pegex::Input;
-    
+
     $grammar_text = "
     expr: num PLUS num
     num: /( DIGIT+ )/
     ";
-    
+
     $grammar = Pegex::Grammar->new(text => $grammar_text);
     $receiver = Pegex::Tree->new();
     $parser = Pegex::Parser->new(
@@ -119,7 +111,7 @@ Continuing with the example above, let's see how to do it a little more formally
         receiver => $receiver,
     );
     $input = Pegex::Input->new(string => '2+2');
-    
+
     print Dump parser->parse($input);
 
 This code does the same thing as the first example, but this time we've made all the objects ourselves.

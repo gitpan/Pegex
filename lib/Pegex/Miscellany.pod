@@ -8,7 +8,7 @@ In the diagram below, there is a simple language called Foo. The diagram shows h
 
                               Parsing a language called "Foo"
                                  with the Pegex toolset.
-    
+
                                 .-----------------------.
     .--------------------.      |    Pegex::Compiler    |
     |    Foo Language    |      |-----------------------|    Serialize

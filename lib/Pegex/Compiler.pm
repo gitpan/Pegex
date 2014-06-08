@@ -1,5 +1,5 @@
 package Pegex::Compiler;
-$Pegex::Compiler::VERSION = '0.30';
+$Pegex::Compiler::VERSION = '0.31';
 use Pegex::Base;
 
 use Pegex::Parser;

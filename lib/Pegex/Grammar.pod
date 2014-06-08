@@ -17,7 +17,7 @@ Define a Pegex grammar (for the Foo syntax):
     package Pegex::Foo::Grammar;
     use base 'Pegex::Base';
     extends 'Pegex::Grammar';
-    
+
     has text => q{
     foo: bar baz
     ... rest of Foo grammar ...
@@ -44,21 +44,22 @@ When L<Pegex::Parser> uses your grammar, it will want it in the tree
 
 =over
 
-=item It is usually produced by `Pegex
+=item tree
 
-CompilerC<. You can inline it in the >tree`
-
-tree
-This is the data structure containing the compiled grammar for your syntax.
+This is the data structure containing the compiled grammar for your syntax. It
+is usually produced by C<Pegex::Compiler>. You can inline it in the C<tree>
 method, or else the C<make_tree> method will be called to produce it.
+
 The C<make_tree> method will call on Pegex::Compiler to compile the C<text>
 property by default. You can define your own C<make_tree> method to do
 override this behavior.
+
 Often times you will want to generate your own Pegex::Grammar subclasses in an
 automated fashion. The Pegex and TestML modules do this to be performant. This
 also allows you to keep your grammar text in a separate file, and often in a
 separate repository, so it can be shared by multiple programming language's
 module implementations.
+
 See L<https://github.com/ingydotnet/pegex-pgx> and L<https://github.com/ingydotnet/pegex-
 pm/blob/master/lib/Pegex/Pegex/Grammar.pm>.
 
