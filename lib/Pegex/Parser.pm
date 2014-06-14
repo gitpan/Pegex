@@ -1,5 +1,5 @@
 package Pegex::Parser;
-$Pegex::Parser::VERSION = '0.31';
+$Pegex::Parser::VERSION = '0.32';
 use Pegex::Base;
 use Pegex::Input;
 use Pegex::Optimizer;
@@ -7,7 +7,7 @@ use Scalar::Util;
 
 {
     package Pegex::Constant;
-$Pegex::Constant::VERSION = '0.31';
+$Pegex::Constant::VERSION = '0.32';
 our $Null = [];
     our $Dummy = [];
 }

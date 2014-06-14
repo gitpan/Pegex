@@ -1,5 +1,5 @@
 package Pegex::Input;
-$Pegex::Input::VERSION = '0.31';
+$Pegex::Input::VERSION = '0.32';
 use Pegex::Base;
 
 has string => ();

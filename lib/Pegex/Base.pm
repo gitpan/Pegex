@@ -1,5 +1,5 @@
 package Pegex::Base;
-$Pegex::Base::VERSION = '0.31';
+$Pegex::Base::VERSION = '0.32';
 # use Mo qw'build default builder xxx import nonlazy';
 #   The following line of code was produced from the previous line by
 #   Mo::Inline version 0.38
