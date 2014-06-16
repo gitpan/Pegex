@@ -1,5 +1,5 @@
 package Pegex::Bootstrap;
-$Pegex::Bootstrap::VERSION = '0.32';
+
 use Carp qw(carp confess croak);
 
 use Pegex::Base;

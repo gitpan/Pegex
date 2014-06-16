@@ -1,5 +1,4 @@
 package Pegex::Optimizer;
-$Pegex::Optimizer::VERSION = '0.32';
 use Pegex::Base;
 
 has parser => (required => 1);

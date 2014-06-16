@@ -1,5 +1,5 @@
 package Pegex::Module;
-$Pegex::Module::VERSION = '0.32';
+
 use Pegex::Base;
 
 has parser_class => 'Pegex::Parser';
