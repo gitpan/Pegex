@@ -18,10 +18,11 @@ no_index:
     - inc
     - t
     - xt
+    - example
 requires:
   perl: v5.8.1
 resources:
   bugtracker: https://github.com/ingydotnet/pegex-pm/issues
   homepage: https://github.com/ingydotnet/pegex-pm
   repository: https://github.com/ingydotnet/pegex-pm.git
-version: '0.33'
+version: '0.34'
