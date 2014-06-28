@@ -12,10 +12,9 @@ example/lib/Precedence.pm
 example/lib/RPN.pm
 example/tokenizer.pl
 inc/Pegex/Base.pm
-inc/Pegex/Bootstrap.pm
-inc/Pegex/Compiler.pm
 inc/Pegex/Grammar.pm
 inc/Pegex/Input.pm
+inc/Pegex/Optimizer.pm
 inc/Pegex/Parser.pm
 inc/Pegex/Receiver.pm
 inc/Pegex/Tree.pm
