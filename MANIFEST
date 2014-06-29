@@ -12,6 +12,8 @@ example/lib/Precedence.pm
 example/lib/RPN.pm
 example/tokenizer.pl
 inc/Pegex/Base.pm
+inc/Pegex/Bootstrap.pm
+inc/Pegex/Compiler.pm
 inc/Pegex/Grammar.pm
 inc/Pegex/Input.pm
 inc/Pegex/Optimizer.pm
@@ -76,6 +78,7 @@ t/TestAST.pm
 t/TestMLBridge.pm
 t/export-api.t
 t/flatten.t
+t/function-rule.t
 t/grammar-api.t
 t/mice.pgx
 t/parse.t
