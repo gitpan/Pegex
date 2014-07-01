@@ -16,7 +16,6 @@ inc/Pegex/Bootstrap.pm
 inc/Pegex/Compiler.pm
 inc/Pegex/Grammar.pm
 inc/Pegex/Input.pm
-inc/Pegex/Optimizer.pm
 inc/Pegex/Parser.pm
 inc/Pegex/Receiver.pm
 inc/Pegex/Tree.pm
@@ -34,7 +33,6 @@ inc/TestML/Library/Standard.pm
 inc/TestML/Runtime.pm
 inc/TestML/Runtime/TAP.pm
 inc/TestML/Util.pm
-inc/Text/Diff.pm
 lib/Pegex.pm
 lib/Pegex.pod
 lib/Pegex/API.pod
