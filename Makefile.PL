@@ -21,10 +21,9 @@ my %WriteMakefileArgs = (
   "NAME" => "Pegex",
   "PREREQ_PM" => {},
   "TEST_REQUIRES" => {
-    "TestML" => 0,
     "YAML::XS" => 0
   },
-  "VERSION" => "0.40",
+  "VERSION" => "0.41",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -32,7 +31,6 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "TestML" => 0,
   "YAML::XS" => 0
 );
 

@@ -39,7 +39,6 @@
       },
       "test" : {
          "requires" : {
-            "TestML" : "0",
             "YAML::XS" : "0"
          }
       }
@@ -56,6 +55,6 @@
          "web" : "https://github.com/ingydotnet/pegex-pm"
       }
    },
-   "version" : "0.40"
+   "version" : "0.41"
 }
 

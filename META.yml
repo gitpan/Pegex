@@ -3,7 +3,6 @@ abstract: 'Acmeist PEG Parser Framework'
 author:
   - 'Ingy döt Net <ingy@cpan.org>'
 build_requires:
-  TestML: '0'
   YAML::XS: '0'
 configure_requires:
   ExtUtils::MakeMaker: '6.30'
@@ -26,4 +25,4 @@ resources:
   bugtracker: https://github.com/ingydotnet/pegex-pm/issues
   homepage: https://github.com/ingydotnet/pegex-pm
   repository: https://github.com/ingydotnet/pegex-pm.git
-version: '0.40'
+version: '0.41'
