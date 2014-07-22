@@ -1,3 +1,6 @@
+0.42 Mon Jul 21 17:25:50 PDT 2014
+ - Fix copyright year stuff
+
 0.41 Thu Jul 17 10:28:16 PDT 2014
  - ZD put an incorrect dep on TestML. @rurban++
 
@@ -60,6 +63,7 @@
  - Support a b | c precedence in Pegex grammars.
  - Complete documenatation.
  - Examples and Tutorials
+ - New receivers, Pegex::Tree and Pegex::Tree::Wrap
  - API becomes more solidified.
 
 0.20 Thu Aug 30 00:06:30 PDT 2012
