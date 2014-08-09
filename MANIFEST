@@ -13,9 +13,13 @@ example/calculator/lib/Precedence.pm
 example/calculator/lib/RPN.pm
 example/calculator/tokenizer.pl
 example/self-parser.pl
+inc/Pegex.pm
 inc/Pegex/Base.pm
+inc/Pegex/Bootstrap.pm
+inc/Pegex/Compiler.pm
 inc/Pegex/Grammar.pm
 inc/Pegex/Input.pm
+inc/Pegex/Optimizer.pm
 inc/Pegex/Parser.pm
 inc/Pegex/Receiver.pm
 inc/Pegex/Tree.pm
@@ -27,7 +31,6 @@ inc/TestML/Compiler/Lite.pm
 inc/TestML/Compiler/Pegex.pm
 inc/TestML/Compiler/Pegex/AST.pm
 inc/TestML/Compiler/Pegex/Grammar.pm
-inc/TestML/Library.pm
 inc/TestML/Library/Debug.pm
 inc/TestML/Library/Standard.pm
 inc/TestML/Runtime.pm
@@ -98,8 +101,7 @@ t/testml/error.tml
 t/testml/optimize.tml
 t/testml/tree-pegex.tml
 t/testml/tree.tml
-xt/TestPegexExtra.pm
-xt/check-related-repos/test.t
+xt/TestDevelPegex.pm
 xt/compilers.t
 xt/grammars/Pg.pgx
 xt/grammars/drinkup.pgx
@@ -114,3 +116,4 @@ xt/grammars/vic.pgx
 xt/grammars/yaml.pgx
 xt/speed-ast.t
 xt/speed.t
+xt/test-pegex-repos.t
