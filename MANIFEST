@@ -86,6 +86,7 @@ t/mice.pgx
 t/parse.t
 t/release-pod-syntax.t
 t/repeat.t
+t/safe.t
 t/sample.t
 t/testml-compiler-checks.t
 t/testml-compiler-equivalence.t

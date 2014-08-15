@@ -25,4 +25,4 @@ resources:
   bugtracker: https://github.com/ingydotnet/pegex-pm/issues
   homepage: https://github.com/ingydotnet/pegex-pm
   repository: https://github.com/ingydotnet/pegex-pm.git
-version: '0.49'
+version: '0.50'
