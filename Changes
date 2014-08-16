@@ -1,3 +1,7 @@
+0.51 Fri Aug 15 20:26:26 PDT 2014
+ - Remove Pegex::Mo
+ - Add t/000-compile-modules.t
+
 0.50 Fri Aug 15 09:30:56 PDT 2014
  - Fixed a Mo bug directly
  - Added regression test

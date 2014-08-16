@@ -51,7 +51,6 @@ lib/Pegex/Grammar/Atoms.pod
 lib/Pegex/Input.pm
 lib/Pegex/Input.pod
 lib/Pegex/Miscellany.pod
-lib/Pegex/Mo.pm
 lib/Pegex/Module.pm
 lib/Pegex/Module.pod
 lib/Pegex/Optimizer.pm
@@ -75,6 +74,7 @@ lib/Pegex/Tree/Wrap.pod
 lib/Pegex/Tutorial.pod
 lib/Pegex/Tutorial/Calculator.pod
 lib/Pegex/Tutorial/JSON.pod
+t/000-compile-modules.t
 t/TestAST.pm
 t/TestMLBridge.pm
 t/api.t
