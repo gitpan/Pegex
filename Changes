@@ -1,3 +1,6 @@
+0.53 Sat Aug 16 11:55:44 PDT 2014
+ - Meta 0.0.2
+
 0.52 Sat Aug 16 02:33:53 PDT 2014
  - Eliminate File::Basename from test/
 
