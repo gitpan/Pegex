@@ -1,3 +1,6 @@
+0.52 Sat Aug 16 02:33:53 PDT 2014
+ - Eliminate File::Basename from test/
+
 0.51 Fri Aug 15 20:26:26 PDT 2014
  - Remove Pegex::Mo
  - Add t/000-compile-modules.t

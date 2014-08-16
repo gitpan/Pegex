@@ -66,7 +66,7 @@ All of these object classes can be subclassed to acheive various results.
 Normally, you will write your own Pegex grammar and a Pegex receiver to
 achieve a task.
 
-=head2 Starting Simple - The `pegex` Function
+=head2 Starting Simple - The C<pegex> Function
 
 The L<Pegex> module exports a function called C<pegex> that you can use for
 smaller tasks. Here is an example:
