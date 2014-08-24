@@ -51,7 +51,7 @@ grammar. As a rule in the grammar matches, its corresponding receiver method
 (if one exists) is called with the data that has been matched. It is the
 receiver's job to take action on the data, often building it into some new
 structure. Pegex will use L<Pegex::Tree::Wrap> as the default receiver; it
-produces a reasonably readable tree of the matched / captured data.
+produces a reasonably readable tree of the matched/captured data.
 
 =item L<Pegex::Input>
 
