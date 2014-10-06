@@ -10,7 +10,8 @@ README
 example/calculator/calculator1.pl
 example/calculator/calculator2.pl
 example/calculator/lib/Precedence.pm
-example/calculator/lib/RPN.pm
+example/calculator/lib/Runner.pm
+example/calculator/tests
 example/calculator/tokenizer.pl
 example/self-parser.pl
 inc/Pegex.pm
