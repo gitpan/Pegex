@@ -75,6 +75,7 @@ lib/Pegex/Tree/Wrap.pod
 lib/Pegex/Tutorial.pod
 lib/Pegex/Tutorial/Calculator.pod
 lib/Pegex/Tutorial/JSON.pod
+share/pegex.pgx
 t/000-compile-modules.t
 t/TestAST.pm
 t/TestMLBridge.pm
